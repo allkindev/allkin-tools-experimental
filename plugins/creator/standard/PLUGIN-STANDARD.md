@@ -257,7 +257,8 @@ Each entry becomes a field of the plugin's Configuration page.
 - **CSS**: prefix every class with the plugin's own short prefix (`.xx-…`);
   never restyle a class of the core. Use Allkin's variables (`--bg`,
   `--bg-raised`, `--border`, `--text`, `--text-dim`, `--accent`, `--sp-1…4`)
-  so the plugin follows the theme. Font sizes come from the scale
+  so the plugin follows the theme. A field with the focus takes `--focus-border`
+  (border) and `--focus-ring` (halo), never `--accent` straight. Font sizes come from the scale
   (`--text-2xs` … `--text-3xl`), weights are 400, 500, 600 or 700.
 - Never build HTML from data with string concatenation: `textContent`, or
   `Allkin.core.escapeHtml`.

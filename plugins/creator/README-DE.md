@@ -1,86 +1,63 @@
 # Creator
 
-Die Tool-Werkstatt von Allkin. Du beschreibst, was du willst; der Agent **Creator** schreibt
-das Tool oder den Dienst; die **Werkbank** prüft es, installiert es in dein Allkin und hilft
-dir beim Debuggen.
+Der Agent, der Tools für Allkin baut. Du beschreibst ihm, was du willst; er stellt seine Fragen
+in einem **Formular**, schreibt das Tool, den Dienst oder die Fähigkeit nach dem Allkin-Standard,
+**prüft** es und debuggt es mit dir. Creator hat keine eigene Seite: Er ist ein Agent in der
+Liste der Agenten, mit dem man spricht.
 
 ## Wozu es dient
 
-- **Ein Tool erstellen**: ein dauerhaft laufendes Programm, eine Seite, ein Stück der
-  Allkin-Oberfläche, ein eigener Agent — oder mehrere zugleich.
-- **Einen Dienst erstellen**: Allkin beibringen, eine externe API zu erreichen, damit deine
+- **Ein Tool erstellen**: ein dauerhaft laufendes Programm, eine Seite, ein Teil der Oberfläche
+  von Allkin, ein eigener Agent – oder mehreres zugleich.
+- **Einen Dienst erstellen**: Allkin beibringen, wie eine externe API erreicht wird, damit deine
   Agenten sie mit deinem Schlüssel aufrufen.
+- **Eine Fähigkeit erstellen**: ein Know-how, das ein Agent bei Bedarf lädt.
 
-Alles, was Creator schreibt, hält den **Allkin-Standard** ein, der mit dem Tool geliefert wird
-(`standard/PLUGIN-STANDARD.md`, `standard/SERVICE-STANDARD.md` und `standard/SKILL-STANDARD.md`) und von der Schaltfläche
-**Prüfen** kontrolliert wird.
+Alles, was Creator schreibt, folgt dem **Allkin-Standard**, der mit dem Tool geliefert wird
+(`standard/PLUGIN-STANDARD.md`, `standard/SERVICE-STANDARD.md`, `standard/SKILL-STANDARD.md`),
+und er prüft es nach jeder Änderung selbst.
 
 ## Erste Schritte
 
-1. Installiere Creator und gewähre auf seiner Seite seine vier Rechte. In diesem Moment werden
-   der Agent Creator und dein lokales Repository angelegt.
-2. Lade die Seite neu und öffne **Creator** im Allkin-Menü (Liste Tools).
-3. Klicke auf **Neu**, wähle *Tool* oder *Dienst*, vergib einen Namen und beschreibe den Bedarf.
-4. Die Unterhaltung mit dem Agenten öffnet sich rechts. Beantworte seine Fragen; er schreibt die
-   Dateien.
+1. Installiere Creator und erteile auf seiner Seite seine drei Rechte. Der Agent **Creator** und
+   dein lokales Repository werden in diesem Moment angelegt.
+2. Öffne die Unterhaltung des Agenten Creator (er steht in der Liste der Agenten, in Rosa wie
+   jeder Agent eines Tools) und sag ihm, was du willst.
+3. Er stellt seine Fragen auf einmal, in einem Formular; antworte, er schreibt die Dateien, prüft
+   sie und sagt dir zum Schluss, was zu tun ist: installieren, ein Recht erteilen, die Seite neu
+   laden, den Dienst starten.
+4. Um das Geschriebene zu installieren: Seite **Tools**, dein Repository „Creator“ ist eine ihrer
+   Quellen; **Installieren**, dann die Rechte auf der Seite des Tools. Ein Dienst wird auf der
+   Seite **Dienste** verbunden, eine Fähigkeit auf der Seite **Fähigkeiten**.
 
-## Die Werkbank
+## Debuggen
 
-**Oben**: das angezeigte Projekt (Auswahlliste), **Neu** und **Unterhaltung**, um das Gespräch
-mit dem Agenten wieder zu öffnen.
-
-**Der Zustand des Projekts**: seine Version, ob es in deinem Allkin installiert ist, der Zustand
-seines Dienstes und das Urteil der Prüfung (konform, Fehler, Warnungen).
-
-**Die Aktionen**:
-
-| Schaltfläche | Wirkung |
-|--------------|---------|
-| Prüfen | Prüft das Projekt gegen den Standard |
-| Installieren / Neu installieren | Kopiert das Tool aus deinem Repository nach Allkin. Gesperrt, solange ein Fehler bleibt |
-| Seite des Tools | Öffnet seine Allkin-Seite: zu gewährende Rechte, Einstellungen, Protokoll |
-| Starten / Neu starten / Stoppen | Steuert den Dienst des Tools |
-| Seite neu laden | Lädt die Oberfläche eines frisch installierten Oberflächen-Tools |
-| Dienste öffnen | Für einen Dienst: Er steht schon im Katalog, er muss nur verbunden werden |
-
-**Den Agenten bitten**: Schaltflächen, die eine Anweisung zum angezeigten Projekt senden — die
-Probleme der Prüfung beheben, Übersetzungen ergänzen, die Dokumentation schreiben, den Code
-durchsehen, das Projekt erklären.
-
-**Die drei Bereiche**:
-
-- **Prüfung** — die Liste der Abweichungen vom Standard. Rot: Allkin würde das Tool ablehnen,
-  oder es würde im Betrieb brechen. Orange: Der Standard verlangt es.
-- **Dateien** — die Dateien des Projekts; ein Klick öffnet die Datei im Editor. Was der Agent
-  gerade geschrieben hat, ist hervorgehoben.
-- **Debug** — das Protokoll des Dienstes und die Fehler, die seit dem Laden in der Seite
-  aufgefangen wurden. **An den Agenten senden** übergibt ihm alles, damit er die Ursache findet.
+Wenn ein Tool nicht tut, was es soll, sag es Creator: Er liest das Protokoll des Dienstes
+(`read_tool_log`), startet die Prüfung erneut (`check_project`), korrigiert, erhöht die Version
+und sagt dir, was du erneut tun sollst. Gib ihm den genauen Fehler, den du siehst: Das hilft ihm
+am meisten.
 
 ## Wo deine Dateien liegen
 
 Im Arbeitsordner des Agenten: `~/.allkin/plugin-data/creator/workspace/`, mit einem Ordner
-`plugins/` und einem Ordner `services/`. Dieser Ordner ist ein **lokales Repository**: Er
-erscheint im Fenster *Repositories* der Seiten Tools und Dienste, und deine Kreationen stehen
-dort mit dem Etikett „Creator“.
+`plugins/`, einem Ordner `services/` und einem Ordner `skills/`. Dieser Ordner ist ein **lokales
+Repository**: Er erscheint im Fenster *Repositorys* der Seiten Tools, Dienste und Fähigkeiten,
+und deine Werke werden dort mit dem Etikett „Creator“ aufgeführt.
 
-Dieser Ordner wird **nicht gelöscht**, wenn du Creator deinstallierst. Um eine Kreation zu
-veröffentlichen, kopiere ihren Ordner in dein Tool-Repository.
+Dieser Ordner wird **nicht gelöscht**, wenn du Creator deinstallierst. Um ein Werk zu
+veröffentlichen, kopiere seinen Ordner in dein Tool-Repository.
 
-## Die verlangten Rechte
+## Angeforderte Rechte
 
 | Recht | Warum |
 |-------|-------|
-| Oberfläche | Die Werkbank zur Allkin-Seite hinzufügen; mit deiner Sitzung Projekte anlegen, deine Tools installieren und ihren Dienst steuern |
-| Eigener Agent | Der Agent Creator, der die Dateien schreibt. Er hat außerhalb seines Arbeitsordners keinen Zugriff auf den Rechner |
-| Repository | Den Arbeitsordner zu einer Quelle für Tools und Dienste dieses Allkin machen |
-| Netzwerk | Dem Agenten erlauben, die Online-Dokumentation von APIs zu lesen |
+| Eigener Agent | Der Agent Creator, der die Dateien schreibt. Er hat außerhalb seines Arbeitsordners keinen Zugriff auf die Maschine |
+| Repository | Den Arbeitsordner zu einer Quelle von Tools, Diensten und Fähigkeiten für dieses Allkin machen |
+| Netzwerk | Den Agenten die Online-Dokumentation von APIs lesen lassen |
 
 ## Wenn es nicht funktioniert
 
-- **„Sein Agent existiert noch nicht“**: Ein Recht ist nicht gewährt. Öffne die Seite des Tools.
-- **Installieren ist ausgegraut**: Die Prüfung hat einen Fehler gefunden. Klicke auf *Probleme
-  beheben*.
-- **Neu installieren bringt nichts**: Die Version hat sich nicht geändert. Die Prüfung meldet es;
-  bitte den Agenten, sie zu erhöhen.
-- **Die Oberfläche des Tools erscheint nicht**: Gewähre seine Rechte auf seiner Seite und lade neu.
+- **Der Agent Creator erscheint nicht**: Ein Recht ist nicht erteilt. Öffne die Seite des Tools.
+- **Installieren ändert nichts**: Die Version hat sich nicht geändert. Bitte Creator, sie zu erhöhen.
+- **Die Oberfläche des Tools erscheint nicht**: Erteile ihre Rechte auf ihrer Seite und lade neu.
 - **Der Agent antwortet nicht**: Prüfe deinen KI-Anbieter in den Einstellungen von Allkin.

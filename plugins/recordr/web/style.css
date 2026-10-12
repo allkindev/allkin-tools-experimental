@@ -41,6 +41,9 @@
   --accent-hover: #0f766e;
   --accent-contrast: #ffffff;
   --accent-soft: rgba(13, 148, 136, 0.1);
+  /* A field with the focus: the colour of Allkin's lit buttons, same in both themes. */
+  --focus-border: #6366f1;
+  --focus-ring: 0 0 0 2px color-mix(in srgb, #6366f1 10%, transparent);
   --danger: #dc2626;
   --danger-hover: #b91c1c;
   --danger-soft: rgba(220, 38, 38, 0.08);
@@ -205,7 +208,7 @@ button, input { font: inherit; }
   background: var(--bg-alt);
   color: var(--text-faint);
 }
-.rc-search:focus-within { border-color: var(--accent); }
+.rc-search:focus-within { border-color: var(--focus-border); box-shadow: var(--focus-ring); }
 .rc-search svg { width: 14px; height: 14px; }
 .rc-search input, .rc-find input { flex: 1; min-width: 0; height: 100%; padding: 0; border: 0; background: none; color: var(--text); font-size: var(--text-sm); outline: none; }
 
@@ -298,7 +301,7 @@ button, input { font: inherit; }
   field-sizing: content;
 }
 .rc-title:hover { border-color: var(--border); }
-.rc-title:focus { outline: none; border-color: var(--accent); background: var(--bg-alt); }
+.rc-title:focus { outline: none; border-color: var(--focus-border); background: var(--bg-alt); box-shadow: var(--focus-ring); }
 .rc-meta { flex: 1 1 0; min-width: 0; font-size: var(--text-xs); color: var(--text-faint); font-variant-numeric: tabular-nums; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .rc-bar-actions { flex: none; display: flex; align-items: center; gap: 2px; }
 @container (max-width: 700px) {
@@ -361,7 +364,7 @@ button, input { font: inherit; }
 @media (hover: none) { .rc-turn-copy { display: none; } }
 .rc-text { margin: 1px calc(-1 * var(--sp-2)) 0; padding: 2px var(--sp-2); border-radius: 6px; font-size: var(--text-lg); line-height: 1.65; white-space: pre-wrap; overflow-wrap: anywhere; outline: none; }
 .rc-text[contenteditable]:hover { background: color-mix(in srgb, var(--text) 4%, transparent); }
-.rc-text[contenteditable]:focus { background: var(--bg-alt); box-shadow: 0 0 0 1px var(--accent); }
+.rc-text[contenteditable]:focus { background: var(--bg-alt); box-shadow: 0 0 0 1px var(--focus-border), var(--focus-ring); }
 /* Not final yet: the provider may still rewrite these words. */
 .rc-interim { color: var(--text-faint); }
 

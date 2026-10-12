@@ -1,20 +1,16 @@
 {
   "name": "Creator",
-  "version": "1.0.6",
-  "description": "L'atelier d'outils : décris ce que tu veux, l'agent Creator écrit l'outil ou le service, et l'établi le contrôle, l'installe et le met au point avec toi.",
+  "version": "1.0.8",
+  "description": "L'agent qui fabrique des outils pour Allkin : décris ce que tu veux, il te pose ses questions dans un formulaire, écrit l'outil, le service ou la compétence selon le standard, le contrôle et le met au point avec toi.",
   "author": "Allkin",
   "permissions": [
     {
-      "id": "interface",
-      "reason": "Ajoute l'établi Creator à la page d'Allkin. Avec ta session, il crée les projets, installe tes outils depuis ton dépôt et pilote leur service."
-    },
-    {
       "id": "agent",
-      "reason": "Creator confie l'écriture des outils et des services à son agent, avec qui tu converses."
+      "reason": "Creator est un agent : tu lui parles comme à tout agent d'Allkin, et c'est lui qui écrit les fichiers, dans son dossier de travail et nulle part ailleurs."
     },
     {
       "id": "repository",
-      "reason": "Le dossier de travail de l'agent devient un dépôt local : ce que vous y écrivez apparaît dans les pages Outils et Services et s'installe depuis là."
+      "reason": "Le dossier de travail de l'agent devient un dépôt local : ce qu'il y écrit apparaît dans les pages Outils, Services et Compétences, et s'installe depuis là."
     },
     {
       "id": "network",
@@ -24,7 +20,7 @@
   "settings": [],
   "agent": {
     "name": "Creator",
-    "description": "L'agent de l'outil Creator : écrit des outils et des services pour Allkin.",
+    "description": "Fabrique des outils, des services et des compétences pour Allkin, selon le standard, et les met au point avec toi.",
     "prompt": [
       "agent.md",
       "standard/PLUGIN-STANDARD.md",
@@ -35,50 +31,31 @@
     "web": true
   },
   "repository": true,
-  "ui": {
-    "apiVersion": 1,
-    "provides": [
-      "creator"
-    ],
-    "html": [
-      "view.html"
-    ],
-    "styles": [
-      "creator.css"
-    ],
-    "scripts": [
-      "locales.js",
-      "creator.js"
-    ]
-  },
   "locales": {
     "en": {
       "name": "Creator",
-      "description": "The tool workshop: describe what you want, the Creator agent writes the tool or the service, and the workbench checks it, installs it and debugs it with you.",
+      "description": "The agent that builds tools for Allkin: describe what you want, it asks its questions in a form, writes the tool, the service or the competence to the standard, checks it and debugs it with you.",
       "permissions": {
-        "interface": "Adds the Creator workbench to the Allkin page. With your session, it creates projects, installs your tools from your repository and drives their service.",
-        "agent": "Creator hands the writing of tools and services to its agent, which you talk with.",
-        "repository": "The agent's working folder becomes a local repository: what you write there appears in the Tools and Services pages and installs from there.",
+        "agent": "Creator is an agent: you talk to it like to any Allkin agent, and it writes the files, in its working folder and nowhere else.",
+        "repository": "The agent's working folder becomes a local repository: what it writes there appears in the Tools, Services and Competences pages and installs from there.",
         "network": "The agent reads the online documentation of APIs to write a service or a tool that connects to them."
       }
     },
     "es": {
       "name": "Creator",
-      "description": "El taller de herramientas: describe lo que quieres, el agente Creator escribe la herramienta o el servicio, y el banco de trabajo lo comprueba, lo instala y lo depura contigo.",
+      "description": "El agente que fabrica herramientas para Allkin: describe lo que quieres, te hace sus preguntas en un formulario, escribe la herramienta, el servicio o la competencia según el estándar, la comprueba y la depura contigo.",
       "permissions": {
-        "interface": "Añade el banco de trabajo Creator a la página de Allkin. Con tu sesión, crea los proyectos, instala tus herramientas desde tu repositorio y controla su servicio.",
-        "agent": "Creator confía la escritura de herramientas y servicios a su agente, con el que conversas.",
-        "repository": "La carpeta de trabajo del agente se convierte en un repositorio local: lo que escribís allí aparece en las páginas Herramientas y Servicios y se instala desde allí.",
+        "agent": "Creator es un agente: le hablas como a cualquier agente de Allkin, y es él quien escribe los archivos, en su carpeta de trabajo y en ningún otro sitio.",
+        "repository": "La carpeta de trabajo del agente se convierte en un repositorio local: lo que escribe allí aparece en las páginas Herramientas, Servicios y Competencias, y se instala desde allí.",
         "network": "El agente lee la documentación en línea de las API para escribir un servicio o una herramienta que se conecte a ellas."
       }
     },
     "de": {
       "name": "Creator",
-      "description": "Die Tool-Werkstatt: Beschreibe, was du willst, der Agent Creator schreibt das Tool oder den Dienst, und die Werkbank prüft, installiert und debuggt es mit dir.",
+      "description": "Der Agent, der Tools für Allkin baut: Beschreibe, was du willst, er stellt seine Fragen in einem Formular, schreibt das Tool, den Dienst oder die Fähigkeit nach dem Standard, prüft es und debuggt es mit dir.",
       "permissions": {
-        "interface": "Fügt die Creator-Werkbank der Allkin-Seite hinzu. Mit deiner Sitzung legt sie Projekte an, installiert deine Tools aus deinem Repository und steuert ihren Dienst.",
-        "agent": "Creator überlässt das Schreiben von Tools und Diensten seinem Agenten, mit dem du dich unterhältst.",
-        "repository": "Der Arbeitsordner des Agenten wird zu einem lokalen Repository: Was ihr dort schreibt, erscheint auf den Seiten Tools und Dienste und wird von dort installiert.",
+        "agent": "Creator ist ein Agent: Du sprichst mit ihm wie mit jedem Allkin-Agenten, und er schreibt die Dateien – in seinem Arbeitsordner und nirgendwo sonst.",
+        "repository": "Der Arbeitsordner des Agenten wird zu einem lokalen Repository: Was er dort schreibt, erscheint auf den Seiten Tools, Dienste und Fähigkeiten und wird von dort installiert.",
         "network": "Der Agent liest die Online-Dokumentation von APIs, um einen Dienst oder ein Tool zu schreiben, das sich damit verbindet."
       }
     }

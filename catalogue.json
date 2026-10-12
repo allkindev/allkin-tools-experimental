@@ -5,21 +5,17 @@
     {
       "id": "creator",
       "name": "Creator",
-      "version": "1.0.6",
-      "description": "L'atelier d'outils : décris ce que tu veux, l'agent Creator écrit l'outil ou le service, et l'établi le contrôle, l'installe et le met au point avec toi.",
+      "version": "1.0.8",
+      "description": "L'agent qui fabrique des outils pour Allkin : décris ce que tu veux, il te pose ses questions dans un formulaire, écrit l'outil, le service ou la compétence selon le standard, le contrôle et le met au point avec toi.",
       "author": "Allkin",
       "permissions": [
         {
-          "id": "interface",
-          "reason": "Ajoute l'établi Creator à la page d'Allkin. Avec ta session, il crée les projets, installe tes outils depuis ton dépôt et pilote leur service."
-        },
-        {
           "id": "agent",
-          "reason": "Creator confie l'écriture des outils et des services à son agent, avec qui tu converses."
+          "reason": "Creator est un agent : tu lui parles comme à tout agent d'Allkin, et c'est lui qui écrit les fichiers, dans son dossier de travail et nulle part ailleurs."
         },
         {
           "id": "repository",
-          "reason": "Le dossier de travail de l'agent devient un dépôt local : ce que vous y écrivez apparaît dans les pages Outils et Services et s'installe depuis là."
+          "reason": "Le dossier de travail de l'agent devient un dépôt local : ce qu'il y écrit apparaît dans les pages Outils, Services et Compétences, et s'installe depuis là."
         },
         {
           "id": "network",
@@ -28,7 +24,7 @@
       ],
       "service": false,
       "web": false,
-      "ui": true,
+      "ui": false,
       "agent": {
         "name": "Creator"
       },
@@ -39,31 +35,28 @@
       "locales": {
         "en": {
           "name": "Creator",
-          "description": "The tool workshop: describe what you want, the Creator agent writes the tool or the service, and the workbench checks it, installs it and debugs it with you.",
+          "description": "The agent that builds tools for Allkin: describe what you want, it asks its questions in a form, writes the tool, the service or the competence to the standard, checks it and debugs it with you.",
           "permissions": {
-            "interface": "Adds the Creator workbench to the Allkin page. With your session, it creates projects, installs your tools from your repository and drives their service.",
-            "agent": "Creator hands the writing of tools and services to its agent, which you talk with.",
-            "repository": "The agent's working folder becomes a local repository: what you write there appears in the Tools and Services pages and installs from there.",
+            "agent": "Creator is an agent: you talk to it like to any Allkin agent, and it writes the files, in its working folder and nowhere else.",
+            "repository": "The agent's working folder becomes a local repository: what it writes there appears in the Tools, Services and Competences pages and installs from there.",
             "network": "The agent reads the online documentation of APIs to write a service or a tool that connects to them."
           }
         },
         "es": {
           "name": "Creator",
-          "description": "El taller de herramientas: describe lo que quieres, el agente Creator escribe la herramienta o el servicio, y el banco de trabajo lo comprueba, lo instala y lo depura contigo.",
+          "description": "El agente que fabrica herramientas para Allkin: describe lo que quieres, te hace sus preguntas en un formulario, escribe la herramienta, el servicio o la competencia según el estándar, la comprueba y la depura contigo.",
           "permissions": {
-            "interface": "Añade el banco de trabajo Creator a la página de Allkin. Con tu sesión, crea los proyectos, instala tus herramientas desde tu repositorio y controla su servicio.",
-            "agent": "Creator confía la escritura de herramientas y servicios a su agente, con el que conversas.",
-            "repository": "La carpeta de trabajo del agente se convierte en un repositorio local: lo que escribís allí aparece en las páginas Herramientas y Servicios y se instala desde allí.",
+            "agent": "Creator es un agente: le hablas como a cualquier agente de Allkin, y es él quien escribe los archivos, en su carpeta de trabajo y en ningún otro sitio.",
+            "repository": "La carpeta de trabajo del agente se convierte en un repositorio local: lo que escribe allí aparece en las páginas Herramientas, Servicios y Competencias, y se instala desde allí.",
             "network": "El agente lee la documentación en línea de las API para escribir un servicio o una herramienta que se conecte a ellas."
           }
         },
         "de": {
           "name": "Creator",
-          "description": "Die Tool-Werkstatt: Beschreibe, was du willst, der Agent Creator schreibt das Tool oder den Dienst, und die Werkbank prüft, installiert und debuggt es mit dir.",
+          "description": "Der Agent, der Tools für Allkin baut: Beschreibe, was du willst, er stellt seine Fragen in einem Formular, schreibt das Tool, den Dienst oder die Fähigkeit nach dem Standard, prüft es und debuggt es mit dir.",
           "permissions": {
-            "interface": "Fügt die Creator-Werkbank der Allkin-Seite hinzu. Mit deiner Sitzung legt sie Projekte an, installiert deine Tools aus deinem Repository und steuert ihren Dienst.",
-            "agent": "Creator überlässt das Schreiben von Tools und Diensten seinem Agenten, mit dem du dich unterhältst.",
-            "repository": "Der Arbeitsordner des Agenten wird zu einem lokalen Repository: Was ihr dort schreibt, erscheint auf den Seiten Tools und Dienste und wird von dort installiert.",
+            "agent": "Creator ist ein Agent: Du sprichst mit ihm wie mit jedem Allkin-Agenten, und er schreibt die Dateien – in seinem Arbeitsordner und nirgendwo sonst.",
+            "repository": "Der Arbeitsordner des Agenten wird zu einem lokalen Repository: Was er dort schreibt, erscheint auf den Seiten Tools, Dienste und Fähigkeiten und wird von dort installiert.",
             "network": "Der Agent liest die Online-Dokumentation von APIs, um einen Dienst oder ein Tool zu schreiben, das sich damit verbindet."
           }
         }
@@ -71,58 +64,43 @@
       "files": [
         {
           "path": "README-DE.md",
-          "size": 4512,
-          "sha256": "bbc819282e1061c0c247c59781b978265af84934ada0ed561023f442d19fae29"
+          "size": 3465,
+          "sha256": "7e01989d891308db9ba92e5cf7175decf537f3b8e16752bed8800ab13dcac872"
         },
         {
           "path": "README-EN.md",
-          "size": 3953,
-          "sha256": "7db2bcfec04f47f28bb6b5f57272af96ec572aab89c5ca4f60ae1c410f33b2e9"
+          "size": 3054,
+          "sha256": "726b05e71dc04a401411718e7ce5309632e568bdee37efe08634bc73cfd7c985"
         },
         {
           "path": "README-ES.md",
-          "size": 4361,
-          "sha256": "3deb6582fe341623ef2535cb6c66bd9bb83e4d3b15691d51ecae32bdb7a1c20b"
+          "size": 3335,
+          "sha256": "8632c8857d81580b85bf9f5aa7b88c54ee6584beb70875ee39661413f67175d2"
         },
         {
           "path": "README.md",
-          "size": 4255,
-          "sha256": "0b7feabd9971d4100f5e231ec73159319a93c634aa7b30abd4a606159e11cd49"
+          "size": 3345,
+          "sha256": "af55ad08bf844b3b81216b3f7f87709ad06d599be4017e332f9fa62cf3bc586b"
         },
         {
           "path": "agent.md",
-          "size": 4437,
-          "sha256": "ddfcbd103ee5a28b913e16e01e2278eceaed00dcc6b03e8d6757d6b26f02b087"
-        },
-        {
-          "path": "creator.css",
-          "size": 11133,
-          "sha256": "8002860b517b12fe3944b67409e0bb3c740409ec3916a15bf866652edb4d32e0"
-        },
-        {
-          "path": "creator.js",
-          "size": 25776,
-          "sha256": "7d6b80d8ee8b6313f9bb5e5449219ee0beed99c0b4d1b9f7eb322a0499213fe2"
+          "size": 5739,
+          "sha256": "e1944bc3aa3b98f32fd57016129a5221fa1ac7281d96cd53b10dad413e9cb500"
         },
         {
           "path": "icon.svg",
-          "size": 741,
-          "sha256": "d2d031432183533d638a7f091ebcd9e6e9075f12126417295f2d25707142e21d"
-        },
-        {
-          "path": "locales.js",
-          "size": 26377,
-          "sha256": "fa5683271f07b5c502ef3c982bfad0476c61a596f90f191065e729f778a69820"
+          "size": 557,
+          "sha256": "f2029272ab021ed10daa5268a0380e29af1c91ebb6e46d0dfc02b250a22bc158"
         },
         {
           "path": "plugin.json",
-          "size": 4226,
-          "sha256": "7eaf3eda33c823668713d53f383acd81bde455ff33631e24cc3ab5c280e6d627"
+          "size": 3749,
+          "sha256": "560372b5a287794e5a83a9cabd9cb4f0a2c51859eb97abfc5118e26d5b4c7f8a"
         },
         {
           "path": "standard/PLUGIN-STANDARD.md",
-          "size": 18253,
-          "sha256": "6aa7658f54feb25eacb200861b6fd7954191a6f2e0aae2cce1874110c740e240"
+          "size": 18364,
+          "sha256": "3f984c29b1b379237694e91336eb2c786df487a569035f113c2ab4623c6f41b5"
         },
         {
           "path": "standard/SERVICE-STANDARD.md",
@@ -138,11 +116,6 @@
           "path": "validation.json",
           "size": 24,
           "sha256": "fa4f05341a991367c51dd2d84214bcee5d6cb3a111e56f96ccb9a5a3c261ac65"
-        },
-        {
-          "path": "view.html",
-          "size": 7023,
-          "sha256": "761cf67534129f8ffcabfb4eece0a774472b803cc52720b948f4f43e520b47d9"
         }
       ]
     },
@@ -235,106 +208,6 @@
           "path": "validation.json",
           "size": 26,
           "sha256": "d4d1dcecd7ac05002f48dd7b057271ec05a27be70b8ea64ae76119d3f90f8e2c"
-        }
-      ]
-    },
-    {
-      "id": "image-editor",
-      "name": "Éditeur d'images",
-      "version": "1.0.3",
-      "description": "Recadrer, réduire, compresser et annoter une image : flèches, formes, texte, étapes numérotées, surligneur, pixelisation. Pour les images des agents, du dossier partagé ou de cet appareil.",
-      "author": "Allkin",
-      "permissions": [
-        {
-          "id": "interface",
-          "reason": "Ajoute l'éditeur d'images à la page d'Allkin. Avec ta session, il lit les images des agents et du dossier partagé, et y enregistre ce que tu modifies — la version précédente part dans la corbeille."
-        }
-      ],
-      "service": false,
-      "web": false,
-      "ui": true,
-      "icon": "icon.svg",
-      "validation": {
-        "status": "pending"
-      },
-      "locales": {
-        "en": {
-          "name": "Image editor",
-          "description": "Crop, resize, compress and annotate an image: arrows, shapes, text, numbered steps, highlighter, pixelation. For the images of agents, of the shared folder or of this device.",
-          "permissions": {
-            "interface": "Adds the image editor to the Allkin page. With your session, it reads the images of agents and of the shared folder, and saves what you change there — the previous version goes to the bin."
-          }
-        },
-        "es": {
-          "name": "Editor de imágenes",
-          "description": "Recortar, reducir, comprimir y anotar una imagen: flechas, formas, texto, pasos numerados, marcador, pixelado. Para las imágenes de los agentes, de la carpeta compartida o de este dispositivo.",
-          "permissions": {
-            "interface": "Añade el editor de imágenes a la página de Allkin. Con tu sesión, lee las imágenes de los agentes y de la carpeta compartida, y guarda allí lo que cambias: la versión anterior va a la papelera."
-          }
-        },
-        "de": {
-          "name": "Bildeditor",
-          "description": "Ein Bild zuschneiden, verkleinern, komprimieren und beschriften: Pfeile, Formen, Text, nummerierte Schritte, Textmarker, Verpixelung. Für die Bilder der Agenten, des freigegebenen Ordners oder dieses Geräts.",
-          "permissions": {
-            "interface": "Fügt den Bildeditor der Allkin-Seite hinzu. Mit deiner Sitzung liest er die Bilder der Agenten und des freigegebenen Ordners und speichert dort, was du änderst – die vorherige Version landet im Papierkorb."
-          }
-        }
-      },
-      "files": [
-        {
-          "path": "README-DE.md",
-          "size": 3861,
-          "sha256": "3824e1e480bbb03ed0dc90c7644b995e4bb810be0194afe75fd06b359226435e"
-        },
-        {
-          "path": "README-EN.md",
-          "size": 3290,
-          "sha256": "6a6d136efde369b2b981c5c0b4dd9d255aad8d8619e55cc8a1be80fabcafcca2"
-        },
-        {
-          "path": "README-ES.md",
-          "size": 3604,
-          "sha256": "922e9fc2a438377b2206e365d4100369df78fa65351d0b36f539d1f0259789ef"
-        },
-        {
-          "path": "README.md",
-          "size": 3730,
-          "sha256": "bfb69b4a6d25e51ff1577191547a145e38466017e4bfc43f457bbb1ae9a557aa"
-        },
-        {
-          "path": "editor.css",
-          "size": 8616,
-          "sha256": "be89476942c0acaa38f8ab6cc2f8a7b5269289d862aed706f96c36874f455f84"
-        },
-        {
-          "path": "editor.js",
-          "size": 59993,
-          "sha256": "315899e2f2a8f7f5f9b431a76900a390ea1152ed5eb8508fa01aaaca9145c3a7"
-        },
-        {
-          "path": "icon.svg",
-          "size": 526,
-          "sha256": "ed71dc7a4252f647ac2e5468c4476f5c766c9e532b210cdc51eaa96faad6f077"
-        },
-        {
-          "path": "locales.js",
-          "size": 26514,
-          "sha256": "212a9f273133df8745385c7f1dfef2aa73cad19be12670775265451c71addda1"
-        },
-        {
-          "path": "plugin.json",
-          "size": 2405,
-          "sha256": "61801e9a4641891582d16a4ceb5446cc5a378e3405b97bf10ac5e59f2aa2cd72"
-        },
-        {
-          "path": "validation.json",
-          "size": 24,
-          "sha256": "fa4f05341a991367c51dd2d84214bcee5d6cb3a111e56f96ccb9a5a3c261ac65"
-        },
-        {
-          "path": "view.html",
-          "size": 12458,
-          "sha256": "c5a6b8ad3926814253fb7f742afb4c90ac75cfcfb963820b1457c646c6f9e403"
         }
       ]
     },
@@ -444,7 +317,7 @@
     {
       "id": "recordr",
       "name": "Recordr",
-      "version": "1.0.4",
+      "version": "1.0.5",
       "description": "Écoute le micro, transcrit ce qui se dit au fil de la parole et distingue les interlocuteurs. La reconnaissance est faite par le service audio que tu choisis.",
       "author": "Allkin",
       "permissions": [
@@ -512,7 +385,7 @@
         {
           "path": "plugin.json",
           "size": 5919,
-          "sha256": "f93b77e8c9ea539ac874a5ed8dc6056e8c98b810f49a09347ca65e9716d1556d"
+          "sha256": "e4404f5e3d36d0be62cecdeb92d18c490f93f68302cc719bfb0a67a1fb89374f"
         },
         {
           "path": "server.mjs",
@@ -546,8 +419,8 @@
         },
         {
           "path": "web/style.css",
-          "size": 24753,
-          "sha256": "f031499a5190eff08500272d4a6c3b051d45758da7311fd1b67d313679ae6850"
+          "size": 25040,
+          "sha256": "5b21bc06406cc01c13aebb92fe7568088c38dd21eb20038a38bd7000c62fee43"
         },
         {
           "path": "web/worklet.js",

@@ -1,83 +1,61 @@
 # Creator
 
-Allkin's tool workshop. You describe what you want; the **Creator** agent writes the tool or
-the service; the **workbench** checks it, installs it into your Allkin and helps you debug it.
+The agent that builds tools for Allkin. You tell it what you want; it asks its questions in a
+**form**, writes the tool, the service or the competence to the Allkin standard, **checks** it
+and debugs it with you. Creator has no page of its own: it is an agent, in the list of agents,
+that you talk to.
 
 ## What it is for
 
-- **Create a tool**: a program that keeps running, a page, a piece of Allkin's interface, a
+- **Create a tool**: a program that runs continuously, a page, a part of Allkin's interface, a
   dedicated agent — or several at once.
 - **Create a service**: teach Allkin how to reach an external API, so that your agents call it
   with your key.
+- **Create a competence**: a know-how an agent loads on demand.
 
 Everything Creator writes follows the **Allkin standard**, shipped with the tool
-(`standard/PLUGIN-STANDARD.md`, `standard/SERVICE-STANDARD.md` and `standard/SKILL-STANDARD.md`) and verified by the **Check**
-button.
+(`standard/PLUGIN-STANDARD.md`, `standard/SERVICE-STANDARD.md`, `standard/SKILL-STANDARD.md`),
+and it checks it itself after every change.
 
 ## Getting started
 
-1. Install Creator, then grant its four rights on its page. The Creator agent and your local
-   repository are created at that moment.
-2. Reload the page, then open **Creator** from the Allkin menu (Tools list).
-3. Click **New**, choose *Tool* or *Service*, give a name and describe the need.
-4. The conversation with the agent opens on the right. Answer its questions; it writes the files.
+1. Install Creator, then grant its three rights on its page. The **Creator** agent and your
+   local repository are created at that moment.
+2. Open the conversation of the Creator agent (it is in the list of agents, in pink like every
+   tool's agent) and tell it what you want.
+3. It asks its questions once, in a form; answer, it writes the files, checks them, and ends by
+   telling you what to do: install, grant a right, reload the page, start the service.
+4. To install what it wrote: **Tools** page, your "Creator" repository is one of its sources;
+   **Install**, then the rights on the tool's page. A service is connected from the **Services**
+   page; a competence from the **Competences** page.
 
-## The workbench
+## Debugging
 
-**At the top**: the project shown (drop-down list), **New**, and **Conversation** to reopen the
-discussion with the agent.
-
-**The state of the project**: its version, whether it is installed in your Allkin, the state of
-its service, and the verdict of the check (conformant, errors, warnings).
-
-**The actions**:
-
-| Button | Effect |
-|--------|--------|
-| Check | Checks the project against the standard |
-| Install / Reinstall | Copies the tool from your repository into Allkin. Blocked while an error remains |
-| Tool's page | Opens its Allkin page: rights to grant, settings, log |
-| Start / Restart / Stop | Drives the tool's service |
-| Reload the page | Loads the interface of a freshly installed interface tool |
-| Open Services | For a service: it is already in the catalogue, it only needs connecting |
-
-**Ask the agent**: buttons that send an instruction about the project shown — fix the issues of
-the check, complete the translations, write the documentation, review the code, explain the
-project.
-
-**The three panes**:
-
-- **Check** — the list of deviations from the standard. Red: Allkin would refuse the tool, or
-  it would break in use. Orange: the standard asks for it.
-- **Files** — the files of the project; a click opens the file in the editor. Those the agent
-  just wrote stand out.
-- **Debug** — the service's log and the errors caught in the page since it loaded. **Send to the
-  agent** hands it all over so that it finds the cause.
+When a tool does not do what it should, tell Creator: it reads the service's log
+(`read_tool_log`), runs the check again (`check_project`), fixes, bumps the version, and tells
+you what to do again. Give it the exact error you see: that is what helps it most.
 
 ## Where your files are
 
 In the agent's working folder: `~/.allkin/plugin-data/creator/workspace/`, with a `plugins/`
-folder and a `services/` folder. This folder is a **local repository**: it appears in the
-*Repositories* window of the Tools and Services pages, and your creations are listed there with
-the "Creator" tag.
+folder, a `services/` folder and a `skills/` folder. That folder is a **local repository**: it
+appears in the *Repositories* window of the Tools, Services and Competences pages, and your
+creations are listed there with the "Creator" tag.
 
-This folder **is not deleted** when you uninstall Creator. To publish a creation, copy its folder
-into your tool repository.
+That folder is **not deleted** when you uninstall Creator. To publish a creation, copy its folder
+into your tools repository.
 
-## The rights asked
+## Rights asked
 
 | Right | Why |
 |-------|-----|
-| Interface | Add the workbench to Allkin's page; with your session, create projects, install your tools and drive their service |
 | Dedicated agent | The Creator agent, which writes the files. It has no access to the machine outside its working folder |
-| Repository | Make the working folder a source of tools and services for this Allkin |
+| Repository | Make the working folder a source of tools, services and competences for this Allkin |
 | Network | Let the agent read the online documentation of APIs |
 
-## When it does not work
+## If it does not work
 
-- **"Its agent does not exist yet"**: a right is not granted. Open the tool's page.
-- **Install is greyed out**: the check found an error. Click *Fix the issues*.
-- **Reinstall brings nothing**: the version did not change. The check says so; ask the agent to
-  raise it.
+- **The Creator agent does not appear**: a right is not granted. Open the tool's page.
+- **Install changes nothing**: the version did not change. Ask Creator to raise it.
 - **The tool's interface does not appear**: grant its rights on its page, then reload.
 - **The agent does not answer**: check your AI provider in Allkin's Settings.

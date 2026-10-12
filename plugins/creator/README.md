@@ -1,7 +1,9 @@
 # Creator
 
-L'atelier d'outils d'Allkin. Tu décris ce que tu veux ; l'agent **Creator** écrit l'outil ou
-le service ; l'**établi** le contrôle, l'installe dans ton Allkin et t'aide à le mettre au point.
+L'agent qui fabrique des outils pour Allkin. Tu lui décris ce que tu veux ; il te pose ses
+questions dans un **formulaire**, écrit l'outil, le service ou la compétence selon le standard
+Allkin, le **contrôle** et le met au point avec toi. Creator n'a pas de page à lui : c'est un
+agent, dans la liste des agents, à qui l'on parle.
 
 ## À quoi ça sert
 
@@ -9,57 +11,37 @@ le service ; l'**établi** le contrôle, l'installe dans ton Allkin et t'aide à
   d'Allkin, un agent dédié — ou plusieurs à la fois.
 - **Créer un service** : apprendre à Allkin comment joindre une API externe, pour que tes agents
   l'appellent avec ta clé.
+- **Créer une compétence** : un savoir-faire qu'un agent charge à la demande.
 
 Tout ce que Creator écrit respecte le **standard Allkin**, livré avec l'outil
-(`standard/PLUGIN-STANDARD.md`, `standard/SERVICE-STANDARD.md` et `standard/SKILL-STANDARD.md`) et vérifié par le bouton
-**Vérifier**.
+(`standard/PLUGIN-STANDARD.md`, `standard/SERVICE-STANDARD.md`, `standard/SKILL-STANDARD.md`),
+et il le vérifie lui-même après chaque modification.
 
 ## Mise en route
 
-1. Installe Creator, puis accorde ses quatre droits sur sa page. L'agent Creator et ton dépôt
+1. Installe Creator, puis accorde ses trois droits sur sa page. L'agent **Creator** et ton dépôt
    local sont créés à ce moment-là.
-2. Recharge la page, puis ouvre **Creator** depuis le menu Allkin (liste Outils).
-3. Clique **Nouveau**, choisis *Outil* ou *Service*, donne un nom et décris le besoin.
-4. La conversation avec l'agent s'ouvre à droite. Réponds à ses questions ; il écrit les fichiers.
+2. Ouvre la conversation de l'agent Creator (il est dans la liste des agents, en rose comme tout
+   agent d'un outil) et dis-lui ce que tu veux.
+3. Il te pose ses questions en une fois, dans un formulaire ; réponds, il écrit les fichiers,
+   les contrôle, et termine en te disant quoi faire : installer, accorder un droit, recharger
+   la page, démarrer le service.
+4. Pour installer ce qu'il a écrit : page **Outils**, ton dépôt « Creator » y est une source ;
+   **Installer**, puis les droits sur la page de l'outil. Un service se branche depuis la page
+   **Services** ; une compétence depuis la page **Compétences**.
 
-## L'établi
+## Mettre au point
 
-**En haut** : le projet affiché (liste déroulante), **Nouveau**, et **Conversation** pour
-rouvrir la discussion avec l'agent.
-
-**L'état du projet** : sa version, s'il est installé dans ton Allkin, l'état de son service, et
-le verdict du contrôle (conforme, erreurs, avertissements).
-
-**Les actions** :
-
-| Bouton | Effet |
-|--------|-------|
-| Vérifier | Contrôle le projet contre le standard |
-| Installer / Réinstaller | Copie l'outil de ton dépôt dans Allkin. Bloqué tant qu'il reste une erreur |
-| Page de l'outil | Ouvre sa page Allkin : droits à accorder, réglages, journal |
-| Démarrer / Redémarrer / Arrêter | Pilote le service de l'outil |
-| Recharger la page | Charge l'interface d'un outil d'interface fraîchement installé |
-| Ouvrir les Services | Pour un service : il est déjà dans le catalogue, il reste à le connecter |
-
-**Demander à l'agent** : des boutons qui envoient une consigne sur le projet affiché — corriger
-les problèmes du contrôle, compléter les traductions, écrire la documentation, relire le code,
-expliquer le projet.
-
-**Les trois volets** :
-
-- **Contrôle** — la liste des écarts au standard. Rouge : Allkin refuserait l'outil, ou il
-  casserait à l'usage. Orange : le standard le demande.
-- **Fichiers** — les fichiers du projet ; un clic ouvre le fichier dans l'éditeur. Ceux que
-  l'agent vient d'écrire sont mis en avant.
-- **Debug** — le journal du service et les erreurs relevées dans la page depuis son chargement.
-  **Envoyer à l'agent** lui transmet le tout pour qu'il trouve la cause.
+Quand un outil ne fait pas ce qu'il faut, dis-le à Creator : il lit le journal du service
+(`read_tool_log`), relance le contrôle (`check_project`), corrige, augmente la version, et te
+dit quoi refaire. Donne-lui l'erreur exacte que tu vois, c'est ce qui l'aide le plus.
 
 ## Où sont tes fichiers
 
 Dans le dossier de travail de l'agent : `~/.allkin/plugin-data/creator/workspace/`, avec un
-dossier `plugins/` et un dossier `services/`. Ce dossier est un **dépôt local** : il apparaît
-dans la fenêtre *Dépôts* des pages Outils et Services, et tes créations y sont listées avec
-l'étiquette « Creator ».
+dossier `plugins/`, un dossier `services/` et un dossier `skills/`. Ce dossier est un **dépôt
+local** : il apparaît dans la fenêtre *Dépôts* des pages Outils, Services et Compétences, et tes
+créations y sont listées avec l'étiquette « Creator ».
 
 Ce dossier **n'est pas supprimé** quand tu désinstalles Creator. Pour publier une création,
 copie son dossier dans ton dépôt d'outils.
@@ -68,16 +50,13 @@ copie son dossier dans ton dépôt d'outils.
 
 | Droit | Pourquoi |
 |-------|----------|
-| Interface | Ajouter l'établi à la page d'Allkin ; avec ta session, créer les projets, installer tes outils et piloter leur service |
 | Agent dédié | L'agent Creator, qui écrit les fichiers. Il n'a aucun accès à la machine en dehors de son dossier de travail |
-| Dépôt | Faire du dossier de travail une source d'outils et de services pour cet Allkin |
+| Dépôt | Faire du dossier de travail une source d'outils, de services et de compétences pour cet Allkin |
 | Réseau | Laisser l'agent lire la documentation en ligne des API |
 
 ## Si ça ne marche pas
 
-- **« Son agent n'existe pas encore »** : un droit n'est pas accordé. Ouvre la page de l'outil.
-- **Installer est grisé** : le contrôle a trouvé une erreur. Clique *Corriger les problèmes*.
-- **Réinstaller n'apporte rien** : la version n'a pas changé. Le contrôle le signale ; demande à
-  l'agent de l'augmenter.
+- **L'agent Creator n'apparaît pas** : un droit n'est pas accordé. Ouvre la page de l'outil.
+- **Installer n'apporte rien** : la version n'a pas changé. Demande à Creator de l'augmenter.
 - **L'interface de l'outil n'apparaît pas** : accorde ses droits sur sa page, puis recharge.
 - **L'agent ne répond pas** : vérifie ton fournisseur IA dans les Paramètres d'Allkin.
