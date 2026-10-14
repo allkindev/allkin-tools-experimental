@@ -2,8 +2,10 @@
 /* ============================================================================
    Notes plugin.
    ----------------------------------------------------------------------------
-   A notepad in a tab of Allkin (kind "notes"): folders on the left, the notes
-   of the folder shown in the middle, the note being written on the right.
+   A notepad in a tab of Allkin (kind "notes"): one column at the left — the
+   pinned notes, the tree of folders with their notes, the bin — and the note
+   being written at the right. The column folds and its width is dragged; on
+   a phone, one part at a time.
 
    A note is a Markdown file, a folder is a folder: everything lives in the
    plugin's folder of the shared folder (share/notes/), so the agents read and
@@ -18,6 +20,9 @@
    The document itself is written in the Markdown editor (capability
    "markdown-editor", plugin `markdown-editor`, required by the manifest):
    nothing here edits text.
+
+   "Ask an agent" sends the note (or the selected passage) to an agent's
+   conversation, which opens beside the note (core.sendToAgent, core.openSplit).
 
    For the other plugins:
      Allkin.capability("notes").open()
@@ -36,15 +41,17 @@ const ROOT = share.pluginFolder("notes");
 const TRASH = "Trash";
 const FILES = "_files";
 const META = ".notes.json";
-/** The views that are not a folder. A folder is its path, "" being the root. */
-const ALL = "*all";
-const PINNED = "*pinned";
+/** The place shown instead of a note. */
 const BIN = "*trash";
 const STORE_KEY = "allkin.plugin.notes";
 const SAVE_DELAY = 700;
 const MAX_DEPTH = 8;
 const NOTE_TYPE = "application/x-allkin-note";
 const FOLDER_TYPE = "application/x-allkin-note-folder";
+/** The column: its width by default and its bounds, in pixels. */
+const COL_DEFAULT = 272;
+const COL_MIN = 190;
+const COL_MAX = 520;
 const toast = (message, kind = "ok") => core.toast?.(message, kind);
 const isPhone = () => window.matchMedia("(max-width: 720px)").matches;
 
@@ -71,8 +78,17 @@ const ICONS = {
   "download-simple:light": [{"d":"M222,144v64a6,6,0,0,1-6,6H40a6,6,0,0,1-6-6V144a6,6,0,0,1,12,0v58H210V144a6,6,0,0,1,12,0Zm-98.24,4.24a6,6,0,0,0,8.48,0l40-40a6,6,0,0,0-8.48-8.48L134,129.51V32a6,6,0,0,0-12,0v97.51L92.24,99.76a6,6,0,0,0-8.48,8.48Z"}],
   "pencil-simple:light": [{"d":"M225.9,74.78,181.21,30.09a14,14,0,0,0-19.8,0L38.1,153.41a13.94,13.94,0,0,0-4.1,9.9V208a14,14,0,0,0,14,14H92.69a13.94,13.94,0,0,0,9.9-4.1L225.9,94.58a14,14,0,0,0,0-19.8ZM94.1,209.41a2,2,0,0,1-1.41.59H48a2,2,0,0,1-2-2V163.31a2,2,0,0,1,.59-1.41L136,72.48,183.51,120ZM217.41,86.1,192,111.51,144.49,64,169.9,38.58a2,2,0,0,1,2.83,0l44.68,44.69a2,2,0,0,1,0,2.83Z"}],
   "arrow-elbow-down-right:light": [{"d":"M220.24,180.24l-48,48a6,6,0,0,1-8.48-8.48L201.51,182H72a6,6,0,0,1-6-6V32a6,6,0,0,1,12,0V170H201.51l-37.75-37.76a6,6,0,1,1,8.48-8.48l48,48A6,6,0,0,1,220.24,180.24Z"}],
+  "arrow-bend-left-up:light": [{"d":"M206,224a6,6,0,0,1-6,6A102.12,102.12,0,0,1,98,128V46.49L60.24,84.24a6,6,0,0,1-8.48-8.48l48-48a6,6,0,0,1,8.48,0l48,48a6,6,0,1,1-8.48,8.48L110,46.49V128a90.1,90.1,0,0,0,90,90A6,6,0,0,1,206,224Z"}],
   "clipboard-text:light": [{"d":"M166,152a6,6,0,0,1-6,6H96a6,6,0,0,1,0-12h64A6,6,0,0,1,166,152Zm-6-38H96a6,6,0,0,0,0,12h64a6,6,0,0,0,0-12Zm54-66V216a14,14,0,0,1-14,14H56a14,14,0,0,1-14-14V48A14,14,0,0,1,56,34H93.17a45.91,45.91,0,0,1,69.66,0H200A14,14,0,0,1,214,48ZM94,64v2h68V64a34,34,0,0,0-68,0ZM202,48a2,2,0,0,0-2-2H170.33A45.77,45.77,0,0,1,174,64v8a6,6,0,0,1-6,6H88a6,6,0,0,1-6-6V64a45.77,45.77,0,0,1,3.67-18H56a2,2,0,0,0-2,2V216a2,2,0,0,0,2,2H200a2,2,0,0,0,2-2Z"}],
   "warning:light": [{"d":"M235.07,189.09,147.61,37.22h0a22.75,22.75,0,0,0-39.22,0L20.93,189.09a21.53,21.53,0,0,0,0,21.72A22.35,22.35,0,0,0,40.55,222h174.9a22.35,22.35,0,0,0,19.6-11.19A21.53,21.53,0,0,0,235.07,189.09ZM224.66,204.8a10.46,10.46,0,0,1-9.21,5.2H40.55a10.46,10.46,0,0,1-9.21-5.2,9.51,9.51,0,0,1,0-9.72L118.79,43.21a10.75,10.75,0,0,1,18.42,0l87.46,151.87A9.51,9.51,0,0,1,224.66,204.8ZM122,144V104a6,6,0,0,1,12,0v40a6,6,0,0,1-12,0Zm16,36a10,10,0,1,1-10-10A10,10,0,0,1,138,180Z"}],
+  "sidebar-simple:light": [{"d":"M216,42H40A14,14,0,0,0,26,56V200a14,14,0,0,0,14,14H216a14,14,0,0,0,14-14V56A14,14,0,0,0,216,42ZM38,200V56a2,2,0,0,1,2-2H82V202H40A2,2,0,0,1,38,200Zm180,0a2,2,0,0,1-2,2H94V54H216a2,2,0,0,1,2,2Z"}],
+  "chat-circle-text:light": [{"d":"M166,112a6,6,0,0,1-6,6H96a6,6,0,0,1,0-12h64A6,6,0,0,1,166,112Zm-6,26H96a6,6,0,0,0,0,12h64a6,6,0,0,0,0-12Zm70-10A102,102,0,0,1,79.31,217.65L44.44,229.27a14,14,0,0,1-17.71-17.71l11.62-34.87A102,102,0,1,1,230,128Zm-12,0A90,90,0,1,0,50.08,173.06a6,6,0,0,1,.5,4.91L38.12,215.35a2,2,0,0,0,2.53,2.53L78,205.42a6.2,6.2,0,0,1,1.9-.31,6.09,6.09,0,0,1,3,.81A90,90,0,0,0,218,128Z"}],
+  "paper-plane-tilt:light": [{"d":"M225.88,30.12a13.83,13.83,0,0,0-13.7-3.58l-.11,0L20.14,84.77A14,14,0,0,0,18,110.85l85.56,41.64L145.12,238a13.87,13.87,0,0,0,12.61,8c.4,0,.81,0,1.21-.05a13.9,13.9,0,0,0,12.29-10.09l58.2-191.93,0-.11A13.83,13.83,0,0,0,225.88,30.12Zm-8,10.4L159.73,232.43l0,.11a2,2,0,0,1-3.76.26l-40.68-83.58,49-49a6,6,0,1,0-8.49-8.49l-49,49L23.15,100a2,2,0,0,1,.31-3.74l.11,0L215.48,38.08a1.94,1.94,0,0,1,1.92.52A2,2,0,0,1,217.92,40.52Z"}],
+  "x:light": [{"d":"M204.24,195.76a6,6,0,1,1-8.48,8.48L128,136.49,60.24,204.24a6,6,0,0,1-8.48-8.48L119.51,128,51.76,60.24a6,6,0,0,1,8.48-8.48L128,119.51l67.76-67.75a6,6,0,0,1,8.48,8.48L136.49,128Z"}],
+  "check:light": [{"d":"M228.24,76.24l-128,128a6,6,0,0,1-8.48,0l-56-56a6,6,0,0,1,8.48-8.48L96,191.51,219.76,67.76a6,6,0,0,1,8.48,8.48Z"}],
+  "arrows-down-up:light": [{"d":"M116.24,171.76a6,6,0,0,1,0,8.48l-32,32a6,6,0,0,1-8.48,0l-32-32a6,6,0,0,1,8.48-8.48L74,193.51V48a6,6,0,0,1,12,0V193.51l21.76-21.75A6,6,0,0,1,116.24,171.76Zm96-96-32-32a6,6,0,0,0-8.48,0l-32,32a6,6,0,0,0,8.48,8.48L170,62.49V208a6,6,0,0,0,12,0V62.49l21.76,21.75a6,6,0,0,0,8.48-8.48Z"}],
+  "clock-counter-clockwise:light": [{"d":"M134,80v44.6l37.09,22.25a6,6,0,0,1-6.18,10.3l-40-24A6,6,0,0,1,122,128V80a6,6,0,0,1,12,0Zm-6-46A93.4,93.4,0,0,0,61.51,61.56c-8.58,8.68-16,17-23.51,25.8V64a6,6,0,0,0-12,0v40a6,6,0,0,0,6,6H72a6,6,0,0,0,0-12H44.73C52.86,88.29,60.79,79.35,70,70a82,82,0,1,1,1.7,117.62,6,6,0,1,0-8.24,8.72A94,94,0,1,0,128,34Z"}],
+  "text-aa:light": [{"d":"M85.43,53.45a6,6,0,0,0-10.86,0l-64,136a6,6,0,1,0,10.86,5.11L38.63,158h82.74l17.2,36.55a6,6,0,1,0,10.86-5.11ZM44.28,146,80,70.09,115.72,146ZM200,98c-12.21,0-21.71,3.28-28.23,9.74a6,6,0,0,0,8.46,8.52c4.18-4.15,10.84-6.26,19.77-6.26,14.34,0,26,9.87,26,22v7.24A40.36,40.36,0,0,0,200,130c-20.95,0-38,15.25-38,34s17.05,34,38,34a40.36,40.36,0,0,0,26-9.24V192a6,6,0,0,0,12,0V132C238,113.25,221,98,200,98Zm0,88c-14.34,0-26-9.87-26-22s11.66-22,26-22,26,9.87,26,22S214.34,186,200,186Z"}],
   "notebook:duotone": [{"d":"M80,40V216H48a8,8,0,0,1-8-8V48a8,8,0,0,1,8-8Z","o":"0.2"},{"d":"M184,112a8,8,0,0,1-8,8H112a8,8,0,0,1,0-16h64A8,8,0,0,1,184,112Zm-8,24H112a8,8,0,0,0,0,16h64a8,8,0,0,0,0-16Zm48-88V208a16,16,0,0,1-16,16H48a16,16,0,0,1-16-16V48A16,16,0,0,1,48,32H208A16,16,0,0,1,224,48ZM48,208H72V48H48Zm160,0V48H88V208H208Z"}],
 };
 
@@ -125,6 +141,14 @@ const titleOf = (path) => baseOf(path).replace(/\.md$/i, "");
 const isInside = (path, folder) => path === folder || path.startsWith(`${folder}/`);
 /** `path` once `from` has become `to` (a rename, a move). */
 const rebase = (path, from, to) => (path === from ? to : path.startsWith(`${from}/`) ? to + path.slice(from.length) : path);
+/** The folders a path is in, the nearest last: "a/b/c.md" -> ["a", "a/b"]. */
+function ancestorsOf(path) {
+  const out = [];
+  const parts = path.split("/");
+  for (let i = 1; i < parts.length; i++) out.push(parts.slice(0, i).join("/"));
+  return out;
+}
+const folderLabel = (folder) => (folder ? folder.split("/").join(" / ") : t("plugin.notes.root"));
 
 /** A name the user typed, made fit for a file or a folder; "" when nothing is left. */
 function cleanName(value) {
@@ -152,28 +176,36 @@ let meta = { pinned: [], trash: {} };
 const contents = new Map();
 /** The note open: { path, content, saved, modifiedAt, timer, chain } */
 let current = null;
+/** BIN while the bin is shown in place of the note. */
+let place = null;
 let editor = null;
 let query = "";
 let scanning = null;
 let openSeq = 0;
+/** The passage selected in the note, kept for "Ask an agent". */
+let selectionText = "";
+/** What is being dragged: { kind: "note" | "folder", path }. */
+let dragging = null;
 
 const prefs = (() => {
+  const base = { note: null, folder: "", sort: "modified", collapsed: [], folded: false, colWidth: null, askAgent: null, askPrompt: null };
   try {
-    return { view: ALL, note: null, sort: "modified", collapsed: [], ...JSON.parse(localStorage.getItem(STORE_KEY) ?? "{}") };
+    const saved = JSON.parse(localStorage.getItem(STORE_KEY) ?? "{}");
+    return { ...base, ...(saved && typeof saved === "object" ? saved : {}) };
   } catch {
-    return { view: ALL, note: null, sort: "modified", collapsed: [] };
+    return base;
   }
 })();
 function savePrefs() {
   try {
     localStorage.setItem(STORE_KEY, JSON.stringify(prefs));
   } catch {
-    // No storage: the notepad opens on "All notes" next time, nothing else.
+    // No storage: the notepad opens on its first note next time, nothing else.
   }
 }
 
 const isPinned = (path) => meta.pinned.includes(path);
-const isFolderView = (view = prefs.view) => view !== ALL && view !== PINNED && view !== BIN;
+const isOpen = (folder) => !prefs.collapsed.includes(folder);
 
 /* ---- Reading the notepad ------------------------------------------------- */
 
@@ -276,7 +308,7 @@ async function pooled(items, job, size = 5) {
   );
 }
 
-/** Markdown read as plain text: what an excerpt or a search looks at. */
+/** Markdown read as plain text: what an excerpt, a search or a count looks at. */
 function plainText(markdown) {
   return String(markdown ?? "")
     .replace(/```[^\n]*\n?/g, " ")
@@ -289,13 +321,19 @@ function plainText(markdown) {
     .trim();
 }
 
+const wordsOf = (text) => (text ? text.split(" ").length : 0);
+
+/** An excerpt around `needle`, as [before, match, after]; the start of the text without one. */
 function excerptOf(text, needle = "") {
   const plain = plainText(text);
   if (needle) {
     const at = plain.toLowerCase().indexOf(needle);
-    if (at > 40) return `…${plain.slice(at - 40, at + 100)}`;
+    if (at >= 0) {
+      const start = Math.max(0, at - 28);
+      return [`${start ? "…" : ""}${plain.slice(start, at)}`, plain.slice(at, at + needle.length), plain.slice(at + needle.length, at + needle.length + 100)];
+    }
   }
-  return plain.slice(0, 140);
+  return [plain.slice(0, 140), "", ""];
 }
 
 /* ---- Saving the note open ------------------------------------------------ */
@@ -337,7 +375,6 @@ function save(note = current) {
       contents.set(note.path, { modifiedAt: note.modifiedAt, text });
       if (current === note) {
         setState(note.content === text ? "saved" : "editing");
-        refreshRow(note.path);
         renderFoot();
       }
     } catch (err) {
@@ -412,31 +449,49 @@ function mountEditor() {
         current.content = next;
         scheduleSave();
       },
-      isActive: () => Boolean(current) && core.activeTab()?.kind === KIND,
+      isActive: () => Boolean(current) && place !== BIN && core.activeTab()?.kind === KIND,
     },
   });
   return true;
 }
 
-/* ---- The note open -------------------------------------------------------- */
+/* ---- What the right side shows: a note, nothing, or the bin -------------- */
 
 function showNote() {
-  const open = Boolean(current);
-  el("nt-note-empty").classList.toggle("hidden", open);
+  const inBin = place === BIN;
+  const open = Boolean(current) && !inBin;
+  el("nt-note-empty").classList.toggle("hidden", open || inBin);
   el("nt-note-body").classList.toggle("hidden", !open);
+  el("nt-trash").classList.toggle("hidden", !inBin);
   el("nt-note-menu").disabled = !open;
+  el("nt-ask").disabled = !open;
+  el("nt-note-menu").classList.toggle("hidden", inBin);
+  el("nt-ask").classList.toggle("hidden", inBin);
+  el("nt-empty-trash").classList.toggle("hidden", !inBin || trash.length === 0);
   if (open) el("nt-title").value = titleOf(current.path);
-  for (const row of el("nt-list").querySelectorAll(".nt-item")) row.classList.toggle("is-current", open && row.dataset.path === current.path);
+  markCurrentRows();
   renderFoot();
   renderWhere();
+}
+
+/** The rows of the column that stand for what is shown. */
+function markCurrentRows() {
+  const col = el("nt-col");
+  for (const row of col.querySelectorAll(".nt-row, .nt-hit")) {
+    const kind = row.dataset.kind;
+    const on =
+      (kind === "bin" && place === BIN) ||
+      (kind === "note" && place !== BIN && Boolean(current) && row.dataset.path === current.path) ||
+      (kind === "folder" && place !== BIN && !current && row.dataset.path === prefs.folder && prefs.folder !== "");
+    row.classList.toggle("is-current", on);
+  }
 }
 
 function renderFoot() {
   const foot = el("nt-foot");
   if (!current) return foot.replaceChildren();
   const plain = plainText(current.content);
-  const words = plain ? plain.split(" ").length : 0;
-  foot.textContent = [tn("plugin.notes.words", words), tn("plugin.notes.characters", plain.length), t("plugin.notes.modified", { date: core.formatDateTime(current.modifiedAt) })].join(" · ");
+  foot.textContent = [tn("plugin.notes.words", wordsOf(plain)), tn("plugin.notes.characters", plain.length), t("plugin.notes.modified", { date: core.formatDateTime(current.modifiedAt) })].join(" · ");
 }
 
 async function openNote(path, { focus = null } = {}) {
@@ -455,13 +510,19 @@ async function openNote(path, { focus = null } = {}) {
     if (seq !== openSeq) return;
     contents.set(path, { modifiedAt: note.modifiedAt, text });
     current = { path, content: text, saved: text, modifiedAt: note.modifiedAt, timer: null, chain: Promise.resolve() };
+    selectionText = "";
     prefs.note = path;
+    prefs.folder = parentOf(path);
     savePrefs();
     setState("");
+    place = null;
     showNote();
     if (!mountEditor()) return;
     editor.render();
     el("nt-doc").scrollTop = 0;
+  } else if (place === BIN) {
+    place = null;
+    showNote();
   }
   setPane("note");
   if (focus === "title") {
@@ -475,283 +536,450 @@ function closeNote() {
   if (!current) return;
   clearTimeout(current.timer);
   current = null;
+  selectionText = "";
   openSeq++;
   prefs.note = null;
   savePrefs();
   setState("");
   showNote();
   editor?.render();
-  if (el("nt-view").dataset.pane === "note") setPane("list");
+  if (el("nt-view").dataset.pane === "note" && place !== BIN) setPane("column");
 }
 
-/* ---- Panes (phone) -------------------------------------------------------- */
+/** The bin, in place of the note. */
+function showBin() {
+  if (query) clearSearch();
+  place = BIN;
+  renderTrash();
+  showNote();
+  setPane("note");
+}
+
+/* ---- Panes (phone) and the bar ------------------------------------------- */
 
 function setPane(pane) {
   el("nt-view").dataset.pane = pane;
   renderWhere();
 }
 
-function viewName(view = prefs.view) {
-  if (view === ALL) return t("plugin.notes.view.all");
-  if (view === PINNED) return t("plugin.notes.view.pinned");
-  if (view === BIN) return t("plugin.notes.view.trash");
-  return view.split("/").join(" / ");
-}
-
-/** What the page bar says: the folder shown, or the one of the note on a phone. */
+/** What the bar says: the folder of the note shown (each segment a button),
+ *  the bin, or the folder chosen in the tree. */
 function renderWhere() {
-  const onNote = el("nt-view").dataset.pane === "note" && current && isPhone();
-  el("nt-where").textContent = onNote ? parentOf(current.path).split("/").join(" / ") || t("plugin.notes.view.all") : query ? t("plugin.notes.search.results") : viewName();
+  const nav = el("nt-crumbs");
+  const crumb = (label, folder, last) => {
+    const button = h("button", "nt-crumb", label);
+    button.type = "button";
+    button.disabled = last;
+    if (!last) button.addEventListener("click", () => revealFolder(folder));
+    return button;
+  };
+  const sep = () => iconNode("caret-right", "nt-crumb-sep");
+  const pieces = [];
+  if (place === BIN) pieces.push(crumb(t("plugin.notes.view.trash"), "", true));
+  else {
+    const folder = current ? parentOf(current.path) : prefs.folder;
+    const chain = folder ? ancestorsOf(`${folder}/x`) : [];
+    // At the root, the bar says so; in a folder, the folders alone are named.
+    if (!chain.length) pieces.push(crumb(t("plugin.notes.root"), "", true));
+    chain.forEach((path, index) => {
+      if (index) pieces.push(sep());
+      pieces.push(crumb(baseOf(path), path, index === chain.length - 1));
+    });
+  }
+  nav.replaceChildren(...pieces);
 }
 
-/* ---- Folders pane --------------------------------------------------------- */
+/** Opens the tree on a folder and shows it. */
+function revealFolder(folder) {
+  if (query) clearSearch();
+  if (place === BIN) {
+    place = null;
+    showNote();
+  }
+  prefs.collapsed = prefs.collapsed.filter((p) => !isInside(folder, p));
+  prefs.folder = folders.has(folder) ? folder : "";
+  savePrefs();
+  renderColumn();
+  renderWhere();
+  if (folder) flashRow("folder", folder);
+  setPane("column");
+}
+
+/* ---- The column ----------------------------------------------------------- */
 
 function countIn(path) {
   const folder = folders.get(path);
   return folder ? folder.notes.length + folder.folders.reduce((sum, sub) => sum + countIn(sub), 0) : 0;
 }
 
-function folderRow({ view, icon, label, count, depth = 0, caret = null }) {
-  const row = h("div", "nt-frow");
-  row.dataset.view = view;
-  row.style.setProperty("--nt-depth", String(depth));
-  row.classList.toggle("is-current", !query && prefs.view === view);
-  if (caret) {
-    const toggle = h("button", `nt-caret${caret.open ? " is-open" : ""}`);
-    toggle.type = "button";
-    toggle.innerHTML = iconSvg("caret-right");
-    toggle.setAttribute("aria-label", t(caret.open ? "plugin.notes.folder.collapse" : "plugin.notes.folder.expand"));
-    toggle.addEventListener("click", () => {
-      prefs.collapsed = caret.open ? [...prefs.collapsed, view] : prefs.collapsed.filter((p) => p !== view);
-      savePrefs();
-      renderFolders();
-    });
-    row.appendChild(toggle);
-  } else row.appendChild(h("span", "nt-caret-gap"));
-  const button = h("button", "nt-fbtn");
-  button.type = "button";
-  button.append(iconNode(icon), h("span", "nt-fname", label));
-  if (count) button.appendChild(h("span", "nt-fcount", String(count)));
-  button.addEventListener("click", () => selectView(view));
-  row.appendChild(button);
-  return row;
-}
-
-function renderFolders() {
-  const nav = el("nt-folders");
-  const rows = [];
-  const all = folderRow({ view: ALL, icon: "notebook", label: t("plugin.notes.view.all"), count: notes.size });
-  // Dropping on "All notes" puts back at the root of the notepad.
-  bindDrop(all, "");
-  rows.push(all);
-  const pinned = meta.pinned.filter((p) => notes.has(p)).length;
-  if (pinned) rows.push(folderRow({ view: PINNED, icon: "push-pin", label: t("plugin.notes.view.pinned"), count: pinned }));
-
-  const addTree = (path, depth) => {
-    const folder = folders.get(path);
-    if (!folder) return;
-    const open = !prefs.collapsed.includes(path);
-    const current = !query && prefs.view === path;
-    const row = folderRow({
-      view: path,
-      icon: current ? "folder-open" : "folder",
-      label: folder.name,
-      count: countIn(path),
-      depth,
-      caret: folder.folders.length ? { open } : null,
-    });
-    row.draggable = true;
-    row.addEventListener("dragstart", (e) => {
-      e.dataTransfer.setData(FOLDER_TYPE, path);
-      e.dataTransfer.effectAllowed = "move";
-    });
-    bindDrop(row, path);
-    row.addEventListener("contextmenu", (e) => {
-      e.preventDefault();
-      openMenu(folderMenu(path), { x: e.clientX, y: e.clientY });
-    });
-    core.bindLongPress?.(row, (touch) => openMenu(folderMenu(path), { x: touch.clientX, y: touch.clientY }));
-    rows.push(row);
-    if (open) for (const sub of folder.folders) addTree(sub, depth + 1);
-  };
-  const root = folders.get("");
-  if (root?.folders.length) rows.push(h("p", "nt-fsep", t("plugin.notes.folders.label")));
-  for (const sub of root?.folders ?? []) addTree(sub, 0);
-
-  const bin = folderRow({ view: BIN, icon: "trash", label: t("plugin.notes.view.trash"), count: trash.length });
-  bin.classList.add("nt-frow-bin");
-  rows.push(bin);
-  nav.replaceChildren(...rows);
-}
-
-function selectView(view) {
-  if (query) {
-    query = "";
-    el("nt-search").value = "";
-  }
-  prefs.view = view;
-  savePrefs();
-  renderFolders();
-  renderList();
-  setPane("list");
-}
-
-/* ---- Drag and drop: a note or a folder onto a folder ----------------------- */
-
-function bindDrop(row, folder) {
-  const accepts = (e) => e.dataTransfer.types.includes(NOTE_TYPE) || e.dataTransfer.types.includes(FOLDER_TYPE);
-  row.addEventListener("dragover", (e) => {
-    if (!accepts(e)) return;
-    e.preventDefault();
-    e.dataTransfer.dropEffect = "move";
-    row.classList.add("is-drop");
-  });
-  row.addEventListener("dragleave", () => row.classList.remove("is-drop"));
-  row.addEventListener("drop", (e) => {
-    row.classList.remove("is-drop");
-    const note = e.dataTransfer.getData(NOTE_TYPE);
-    const moved = e.dataTransfer.getData(FOLDER_TYPE);
-    if (!note && !moved) return;
-    e.preventDefault();
-    void moveTo(note || moved, folder, note ? "note" : "folder");
-  });
-}
-
-/* ---- Notes list ----------------------------------------------------------- */
-
 const SORTS = {
   modified: (a, b) => b.modifiedAt.localeCompare(a.modifiedAt),
   created: (a, b) => b.createdAt.localeCompare(a.createdAt),
   title: (a, b) => a.title.localeCompare(b.title, Allkin.i18n.locale, { numeric: true, sensitivity: "base" }),
 };
+const byName = (a, b) => baseOf(a).localeCompare(baseOf(b), Allkin.i18n.locale, { numeric: true, sensitivity: "base" });
 
-/** The notes the list shows, in order: pinned first, then the sort chosen. */
-function shownNotes() {
-  let list;
-  const needle = query.toLowerCase();
-  if (needle) {
-    list = [...notes.values()].filter((n) => n.title.toLowerCase().includes(needle) || plainText(contents.get(n.path)?.text).toLowerCase().includes(needle));
-  } else if (prefs.view === ALL) list = [...notes.values()];
-  else if (prefs.view === PINNED) list = meta.pinned.map((p) => notes.get(p)).filter(Boolean);
-  else list = (folders.get(prefs.view)?.notes ?? []).map((p) => notes.get(p)).filter(Boolean);
+function sortedNotes(paths) {
   const order = SORTS[prefs.sort] ?? SORTS.modified;
-  return list.sort((a, b) => Number(isPinned(b.path)) - Number(isPinned(a.path)) || order(a, b));
+  return paths.map((p) => notes.get(p)).filter(Boolean).sort(order);
 }
 
-function noteRow(note) {
-  const row = h("div", "nt-item");
-  row.setAttribute("role", "listitem");
-  row.tabIndex = 0;
-  row.dataset.path = note.path;
-  row.draggable = true;
-  row.classList.toggle("is-current", current?.path === note.path);
-  const head = h("div", "nt-item-head");
-  if (isPinned(note.path)) head.appendChild(iconNode("push-pin", "nt-item-pin"));
-  head.appendChild(h("span", "nt-item-title", note.title));
-  const sub = h("div", "nt-item-sub");
-  sub.append(h("span", "nt-item-date", core.formatRelativeTime?.(note.modifiedAt) ?? core.formatDateTime(note.modifiedAt)), h("span", "nt-item-text"));
-  row.append(head, sub);
-  // Where it is, when the list mixes folders.
-  if ((query || !isFolderView()) && note.folder) {
-    const where = h("div", "nt-item-where");
-    where.append(iconNode("folder"), h("span", "", note.folder.split("/").join(" / ")));
-    row.appendChild(where);
+function groupLabel(text, buttons = []) {
+  const label = h("p", "nt-group");
+  label.appendChild(h("span", "", text));
+  for (const { icon, title, onClick } of buttons) {
+    const button = h("button", "nt-group-btn");
+    button.type = "button";
+    button.title = title;
+    button.setAttribute("aria-label", title);
+    button.innerHTML = iconSvg(icon);
+    button.addEventListener("click", (e) => onClick(e));
+    label.appendChild(button);
   }
-  row.addEventListener("click", () => void openNote(note.path));
-  row.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") void openNote(note.path, { focus: "text" });
-    else if (e.key === "Delete") void trashNote(note.path);
-    else if (e.key === "ArrowDown" || e.key === "ArrowUp") {
-      e.preventDefault();
-      (e.key === "ArrowDown" ? row.nextElementSibling : row.previousElementSibling)?.focus();
-    }
-  });
+  return label;
+}
+
+/** A row of the column: a note, a folder or the bin. */
+function treeRow({ kind, path, icon, label, count = null, depth = 0, caret = null }) {
+  const row = h("div", "nt-row");
+  row.dataset.kind = kind;
+  row.dataset.path = path;
+  row.tabIndex = 0;
+  row.style.setProperty("--nt-depth", String(depth));
+  if (caret) {
+    const toggle = h("button", `nt-caret${caret.open ? " is-open" : ""}`);
+    toggle.type = "button";
+    toggle.innerHTML = iconSvg("caret-right");
+    toggle.setAttribute("aria-label", t(caret.open ? "plugin.notes.folder.collapse" : "plugin.notes.folder.expand"));
+    toggle.addEventListener("click", (e) => {
+      e.stopPropagation();
+      toggleFolder(path);
+    });
+    row.appendChild(toggle);
+  } else row.appendChild(h("span", "nt-caret-gap"));
+  row.append(iconNode(icon), h("span", "nt-name", label));
+  if (count) row.appendChild(h("span", "nt-count", String(count)));
+  row.addEventListener("keydown", (e) => onRowKey(e, row));
+  return row;
+}
+
+function toggleFolder(path) {
+  prefs.collapsed = isOpen(path) ? [...prefs.collapsed, path] : prefs.collapsed.filter((p) => p !== path);
+  savePrefs();
+  renderColumn();
+}
+
+/** Arrows move along the rows, Enter opens, Delete sends to the bin. */
+function onRowKey(e, row) {
+  const { kind, path } = row.dataset;
+  if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+    e.preventDefault();
+    const rows = [...el("nt-col").querySelectorAll(".nt-row, .nt-hit")];
+    const at = rows.indexOf(row);
+    rows[at + (e.key === "ArrowDown" ? 1 : -1)]?.focus();
+  } else if (e.key === "Enter") {
+    if (kind === "note") void openNote(path, { focus: "text" });
+    else if (kind === "folder") toggleFolder(path);
+    else if (kind === "bin") showBin();
+  } else if (e.key === "ArrowRight" && kind === "folder" && !isOpen(path)) toggleFolder(path);
+  else if (e.key === "ArrowLeft" && kind === "folder" && isOpen(path)) toggleFolder(path);
+  else if (e.key === "Delete" && kind === "note") void trashNote(path);
+  else if (e.key === "Delete" && kind === "folder") void trashFolder(path);
+}
+
+function bindMenu(row, items) {
   row.addEventListener("contextmenu", (e) => {
     e.preventDefault();
-    openMenu(noteMenu(note.path), { x: e.clientX, y: e.clientY });
+    openMenu(items(), { x: e.clientX, y: e.clientY });
   });
-  core.bindLongPress?.(row, (touch) => openMenu(noteMenu(note.path), { x: touch.clientX, y: touch.clientY }));
-  row.addEventListener("dragstart", (e) => {
-    e.dataTransfer.setData(NOTE_TYPE, note.path);
-    e.dataTransfer.effectAllowed = "move";
-  });
-  return row;
+  core.bindLongPress?.(row, (touch) => openMenu(items(), { x: touch.clientX, y: touch.clientY }));
 }
 
-/** The date and the excerpt of a row, again: the note was just saved. */
-function refreshRow(path) {
-  const row = [...el("nt-list").querySelectorAll(".nt-item")].find((r) => r.dataset.path === path);
+function noteRow(path, depth, { pinnedGroup = false } = {}) {
   const note = notes.get(path);
-  if (!row || !note) return;
-  row.querySelector(".nt-item-date").textContent = core.formatRelativeTime?.(note.modifiedAt) ?? core.formatDateTime(note.modifiedAt);
-  row.querySelector(".nt-item-text").textContent = excerptOf(contents.get(path)?.text, query.toLowerCase());
-}
-
-function trashRow(entry) {
-  const row = h("div", "nt-item nt-item-trash");
-  row.setAttribute("role", "listitem");
-  const info = meta.trash[entry.name];
-  const head = h("div", "nt-item-head");
-  head.append(iconNode(entry.type === "dir" ? "folder" : "note"), h("span", "nt-item-title", entry.type === "dir" ? entry.name : titleOf(entry.name)));
-  const sub = h("div", "nt-item-sub");
-  sub.appendChild(h("span", "nt-item-date", t("plugin.notes.trash.deleted", { date: core.formatDateTime(info?.at ?? entry.modifiedAt) })));
-  if (info?.from) sub.appendChild(h("span", "nt-item-text", info.from.split("/").join(" / ")));
-  const actions = h("div", "nt-item-actions");
-  const restore = h("button", "nt-item-btn");
-  restore.type = "button";
-  restore.innerHTML = `${iconSvg("arrow-counter-clockwise")}<span>${core.escapeHtml(t("plugin.notes.trash.restore"))}</span>`;
-  restore.addEventListener("click", () => void restoreEntry(entry));
-  const erase = h("button", "nt-item-btn is-danger");
-  erase.type = "button";
-  erase.innerHTML = `${iconSvg("trash")}<span>${core.escapeHtml(t("plugin.notes.trash.erase"))}</span>`;
-  erase.addEventListener("click", () => void eraseEntry(entry));
-  actions.append(restore, erase);
-  row.append(head, sub, actions);
+  const row = treeRow({ kind: "note", path, icon: pinnedGroup ? "push-pin" : "note", label: note.title, depth });
+  row.title = note.title;
+  row.addEventListener("click", () => void openNote(path));
+  bindMenu(row, () => noteMenu(path));
+  bindDrag(row, "note", path);
   return row;
 }
 
-function emptyRow(key) {
-  return h("p", "nt-list-empty", t(key));
+function folderRow(path, depth) {
+  const folder = folders.get(path);
+  const open = isOpen(path);
+  const row = treeRow({
+    kind: "folder",
+    path,
+    icon: open ? "folder-open" : "folder",
+    label: folder.name,
+    count: countIn(path),
+    depth,
+    caret: folder.folders.length || folder.notes.length ? { open } : null,
+  });
+  row.title = folder.name;
+  row.addEventListener("click", () => {
+    prefs.folder = path;
+    toggleFolder(path);
+    renderWhere();
+  });
+  bindMenu(row, () => folderMenu(path));
+  bindDrag(row, "folder", path);
+  bindDrop(row, path);
+  return row;
 }
 
-function renderList() {
-  const list = el("nt-list");
-  const inBin = !query && prefs.view === BIN;
-  el("nt-sort").classList.toggle("hidden", inBin);
-  el("nt-empty-trash").classList.toggle("hidden", !inBin || trash.length === 0);
-  el("nt-sort").value = prefs.sort;
-  renderWhere();
-  if (inBin) {
-    el("nt-count").textContent = tn("plugin.notes.trash.count", trash.length);
-    list.replaceChildren(...(trash.length ? trash.map(trashRow) : [emptyRow("plugin.notes.trash.none")]));
-    return;
+function renderColumn() {
+  const col = el("nt-col");
+  if (query) return renderHits();
+  const rows = [];
+  const pinned = meta.pinned.filter((p) => notes.has(p));
+  if (pinned.length) {
+    rows.push(groupLabel(t("plugin.notes.view.pinned")));
+    for (const path of pinned) rows.push(noteRow(path, 0, { pinnedGroup: true }));
   }
-  const shown = shownNotes();
-  el("nt-count").textContent = tn("plugin.notes.count", shown.length);
-  list.replaceChildren(...(shown.length ? shown.map(noteRow) : [emptyRow(query ? "plugin.notes.search.none" : "plugin.notes.list.none")]));
-  // Excerpts arrive as the texts are read.
-  const needle = query.toLowerCase();
-  void pooled(shown, async (note) => {
-    await textOf(note.path);
-    if (needle === query.toLowerCase()) refreshRow(note.path);
+
+  // The head of the tree is also where a dragged element lands to leave its
+  // folder: it changes its words during a drag, never its place.
+  const head = groupLabel(dragging ? t("plugin.notes.rootzone") : t("plugin.notes.group.notes"), [
+    { icon: "folder-plus", title: t("plugin.notes.folder.newTitle"), onClick: () => void createFolder("") },
+    { icon: "arrows-down-up", title: t("plugin.notes.sort.label"), onClick: (e) => openMenu(sortMenu(), { anchor: e.currentTarget }) },
+  ]);
+  head.classList.add("nt-group-root");
+  bindDrop(head, "");
+  rows.push(head);
+  const addTree = (path, depth) => {
+    const folder = folders.get(path);
+    if (!folder) return;
+    for (const sub of [...folder.folders].sort(byName)) {
+      rows.push(folderRow(sub, depth));
+      if (isOpen(sub)) addTree(sub, depth + 1);
+    }
+    for (const note of sortedNotes(folder.notes)) rows.push(noteRow(note.path, depth));
+  };
+  addTree("", 0);
+  if (notes.size === 0 && (folders.get("")?.folders.length ?? 0) === 0) rows.push(h("p", "nt-col-empty", t("plugin.notes.list.none")));
+
+  const bin = treeRow({ kind: "bin", path: BIN, icon: "trash", label: t("plugin.notes.view.trash"), count: trash.length });
+  bin.classList.add("nt-row-bin");
+  bin.addEventListener("click", showBin);
+  bindDrop(bin, BIN);
+  rows.push(bin);
+
+  col.replaceChildren(...rows);
+  if (dragging) for (const row of col.querySelectorAll(`.nt-row[data-kind="${dragging.kind}"]`)) row.classList.toggle("is-dragged", row.dataset.path === dragging.path);
+  markCurrentRows();
+}
+
+/** A short light on a row: the one just moved, restored or revealed. */
+function flashRow(kind, path) {
+  const row = [...el("nt-col").querySelectorAll(`.nt-row[data-kind="${kind}"]`)].find((r) => r.dataset.path === path);
+  if (!row) return;
+  row.scrollIntoView({ block: "nearest" });
+  row.classList.remove("is-flash");
+  void row.offsetWidth;
+  row.classList.add("is-flash");
+  row.addEventListener("animationend", () => row.classList.remove("is-flash"), { once: true });
+}
+
+/* ---- Drag and drop: a note or a folder onto a folder, the root, the bin --- */
+
+function bindDrag(row, kind, path) {
+  row.draggable = true;
+  row.addEventListener("dragstart", (e) => {
+    e.dataTransfer.setData(kind === "note" ? NOTE_TYPE : FOLDER_TYPE, path);
+    e.dataTransfer.setData("text/plain", path);
+    e.dataTransfer.effectAllowed = "move";
+    dragging = { kind, path };
+    closeMenu();
+    // The page changes once the drag image is taken: a layout shift during
+    // dragstart itself cancels the drag in some browsers.
+    requestAnimationFrame(() => {
+      if (dragging?.path !== path) return;
+      row.classList.add("is-dragged");
+      el("nt-view").classList.add("is-dragging");
+      setRootZoneText(true);
+    });
+  });
+  row.addEventListener("dragend", endDrag);
+}
+
+/** The head of the tree says "drop here" while something is dragged. */
+function setRootZoneText(dragged) {
+  const label = el("nt-col").querySelector(".nt-group-root > span");
+  if (label) label.textContent = t(dragged ? "plugin.notes.rootzone" : "plugin.notes.group.notes");
+}
+
+function endDrag() {
+  dragging = null;
+  clearTimeout(expandTimer);
+  expandTimer = null;
+  const view = el("nt-view");
+  view.classList.remove("is-dragging");
+  setRootZoneText(false);
+  for (const node of view.querySelectorAll(".is-drop, .is-dragged")) node.classList.remove("is-drop", "is-dragged");
+}
+
+/** What is dragged, from the state or, failing that, from the transfer. */
+function draggedFrom(e) {
+  if (dragging) return dragging;
+  const note = e.dataTransfer.getData(NOTE_TYPE);
+  if (note) return { kind: "note", path: note };
+  const folder = e.dataTransfer.getData(FOLDER_TYPE);
+  return folder ? { kind: "folder", path: folder } : null;
+}
+
+/** Whether `item` may land in `folder` ("" the root, BIN the bin). */
+function canDrop(item, folder) {
+  if (!item) return false;
+  if (folder === BIN) return true;
+  if (!folders.has(folder) || parentOf(item.path) === folder) return false;
+  return item.kind !== "folder" || !isInside(folder, item.path);
+}
+
+let expandTimer = null;
+
+function bindDrop(node, folder) {
+  const carries = (e) => e.dataTransfer.types.includes(NOTE_TYPE) || e.dataTransfer.types.includes(FOLDER_TYPE);
+  node.addEventListener("dragover", (e) => {
+    if (!carries(e) || !canDrop(dragging, folder)) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    if (node.classList.contains("is-drop")) return;
+    node.classList.add("is-drop");
+    // A closed folder hovered for a moment opens, so that what is below is reachable.
+    clearTimeout(expandTimer);
+    expandTimer = folders.has(folder) && folder && !isOpen(folder) ? setTimeout(() => toggleFolder(folder), 700) : null;
+  });
+  node.addEventListener("dragleave", (e) => {
+    if (node.contains(e.relatedTarget)) return;
+    node.classList.remove("is-drop");
+    clearTimeout(expandTimer);
+    expandTimer = null;
+  });
+  node.addEventListener("drop", (e) => {
+    node.classList.remove("is-drop");
+    const item = draggedFrom(e);
+    if (!item) return;
+    e.preventDefault();
+    endDrag();
+    if (folder === BIN) void (item.kind === "note" ? trashNote(item.path) : trashFolder(item.path));
+    else void moveTo(item.path, folder, item.kind);
   });
 }
 
-/* ---- Search ---------------------------------------------------------------- */
+/* ---- Search: the results take the column ---------------------------------- */
+
+function matching() {
+  const needle = query.toLowerCase();
+  const order = SORTS[prefs.sort] ?? SORTS.modified;
+  return [...notes.values()].filter((n) => n.title.toLowerCase().includes(needle) || plainText(contents.get(n.path)?.text).toLowerCase().includes(needle)).sort(order);
+}
+
+function renderHits() {
+  const col = el("nt-col");
+  const needle = query.toLowerCase();
+  const hits = matching();
+  const rows = [groupLabel(tn("plugin.notes.count", hits.length))];
+  for (const note of hits) {
+    const row = h("div", "nt-hit");
+    row.dataset.kind = "note";
+    row.dataset.path = note.path;
+    row.tabIndex = 0;
+    const title = h("span", "nt-hit-title");
+    title.append(iconNode("note"), h("span", "", note.title));
+    const text = h("span", "nt-hit-text");
+    const [before, match, after] = excerptOf(contents.get(note.path)?.text, needle);
+    text.append(before);
+    if (match) text.append(Object.assign(h("mark", "", match)), after);
+    row.append(title, h("span", "nt-hit-where", folderLabel(note.folder)), text);
+    row.addEventListener("click", () => void openNote(note.path));
+    row.addEventListener("keydown", (e) => onRowKey(e, row));
+    bindMenu(row, () => noteMenu(note.path));
+    rows.push(row);
+  }
+  if (!hits.length) rows.push(h("p", "nt-col-empty", t("plugin.notes.search.none")));
+  col.replaceChildren(...rows);
+  markCurrentRows();
+}
 
 let searchTimer = null;
 function onSearch(value) {
   clearTimeout(searchTimer);
   searchTimer = setTimeout(async () => {
     query = value.trim();
-    renderFolders();
-    // Titles answer at once; the texts once they are all read.
-    renderList();
+    renderColumn();
+    renderWhere();
     if (!query) return;
+    // Titles answer at once; the texts once they are all read.
     const asked = query;
     await pooled([...notes.keys()], (path) => textOf(path));
-    if (asked === query) renderList();
+    if (asked === query) renderColumn();
   }, 200);
+}
+
+function clearSearch() {
+  clearTimeout(searchTimer);
+  query = "";
+  el("nt-search").value = "";
+  renderColumn();
+  renderWhere();
+}
+
+/* ---- The column: folded, resized ------------------------------------------- */
+
+function applyColumn() {
+  const view = el("nt-view");
+  view.classList.toggle("is-folded", Boolean(prefs.folded));
+  const fold = el("nt-fold");
+  fold.classList.toggle("is-on", Boolean(prefs.folded));
+  fold.setAttribute("aria-pressed", String(Boolean(prefs.folded)));
+  fold.title = t(prefs.folded ? "plugin.notes.column.unfold" : "plugin.notes.column.fold");
+  fold.setAttribute("aria-label", fold.title);
+  const width = Number(prefs.colWidth);
+  view.style.setProperty("--nt-col-w", `${width >= COL_MIN && width <= COL_MAX ? width : COL_DEFAULT}px`);
+}
+
+function toggleFolded() {
+  prefs.folded = !prefs.folded;
+  savePrefs();
+  applyColumn();
+}
+
+function bindHandle() {
+  const handle = el("nt-handle");
+  const view = el("nt-view");
+  let drag = null;
+  handle.addEventListener("pointerdown", (e) => {
+    if (e.button !== 0) return;
+    drag = { id: e.pointerId, x: e.clientX, width: el("nt-col").getBoundingClientRect().width };
+    handle.setPointerCapture(e.pointerId);
+    handle.classList.add("is-active");
+    view.classList.add("is-resizing");
+    e.preventDefault();
+  });
+  handle.addEventListener("pointermove", (e) => {
+    if (!drag || e.pointerId !== drag.id) return;
+    const width = Math.round(Math.min(COL_MAX, Math.max(COL_MIN, drag.width + e.clientX - drag.x)));
+    view.style.setProperty("--nt-col-w", `${width}px`);
+    drag.last = width;
+  });
+  const end = (e) => {
+    if (!drag || e.pointerId !== drag.id) return;
+    if (drag.last) prefs.colWidth = drag.last;
+    savePrefs();
+    drag = null;
+    handle.classList.remove("is-active");
+    view.classList.remove("is-resizing");
+  };
+  handle.addEventListener("pointerup", end);
+  handle.addEventListener("pointercancel", end);
+  // A double click gives the column its width by default.
+  handle.addEventListener("dblclick", () => {
+    prefs.colWidth = null;
+    savePrefs();
+    applyColumn();
+  });
 }
 
 /* ---- Menus ------------------------------------------------------------------ */
@@ -768,10 +996,11 @@ function openMenu(items, { x, y, anchor } = {}) {
   menu.replaceChildren(
     ...items.filter(Boolean).map((item) => {
       if (item === "-") return h("div", "nt-menu-sep");
-      const button = h("button", `nt-menu-item${item.danger ? " is-danger" : ""}`);
+      const button = h("button", `nt-menu-item${item.danger ? " is-danger" : ""}${item.checked ? " is-checked" : ""}`);
       button.type = "button";
-      button.setAttribute("role", "menuitem");
-      button.innerHTML = `${iconSvg(item.icon)}<span>${core.escapeHtml(item.label)}</span>`;
+      button.setAttribute("role", item.checked === undefined ? "menuitem" : "menuitemradio");
+      if (item.checked !== undefined) button.setAttribute("aria-checked", String(item.checked));
+      button.innerHTML = `${iconSvg(item.icon)}<span>${core.escapeHtml(item.label)}</span>${item.checked === undefined ? "" : `<span class="nt-menu-check">${iconSvg("check")}</span>`}`;
       button.addEventListener("click", () => {
         closeMenu();
         void item.run();
@@ -797,8 +1026,10 @@ function noteMenu(path) {
     { icon: pinned ? "push-pin-slash" : "push-pin", label: t(pinned ? "plugin.notes.note.unpin" : "plugin.notes.note.pin"), run: () => togglePin(path) },
     { icon: "pencil-simple", label: t("plugin.notes.rename"), run: () => openNote(path, { focus: "title" }) },
     { icon: "copy-simple", label: t("plugin.notes.note.duplicate"), run: () => duplicateNote(path) },
-    { icon: "arrow-elbow-down-right", label: t("plugin.notes.move"), run: () => pickFolder(path, "note") },
+    { icon: "arrow-elbow-down-right", label: t("plugin.notes.move"), run: () => openMoveModal(path, "note") },
+    parentOf(path) && { icon: "arrow-bend-left-up", label: t("plugin.notes.move.toRoot"), run: () => moveTo(path, "", "note") },
     "-",
+    { icon: "chat-circle-text", label: t("plugin.notes.ask"), run: () => openAsk(path) },
     { icon: "clipboard-text", label: t("plugin.notes.note.copyText"), run: () => copyText(path) },
     { icon: "download-simple", label: t("plugin.notes.note.download"), run: () => download(path) },
     "-",
@@ -812,36 +1043,187 @@ function folderMenu(path) {
     { icon: "folder-plus", label: t("plugin.notes.folder.newSub"), run: () => createFolder(path) },
     "-",
     { icon: "pencil-simple", label: t("plugin.notes.rename"), run: () => renameFolder(path) },
-    { icon: "arrow-elbow-down-right", label: t("plugin.notes.move"), run: () => pickFolder(path, "folder") },
+    { icon: "arrow-elbow-down-right", label: t("plugin.notes.move"), run: () => openMoveModal(path, "folder") },
+    parentOf(path) && { icon: "arrow-bend-left-up", label: t("plugin.notes.move.toRoot"), run: () => moveTo(path, "", "folder") },
     "-",
     { icon: "trash", label: t("plugin.notes.delete"), danger: true, run: () => trashFolder(path) },
   ];
 }
 
-/* ---- "Move to…" -------------------------------------------------------------- */
+function sortMenu() {
+  return ["modified", "created", "title"].map((sort) => ({
+    icon: sort === "title" ? "text-aa" : "clock-counter-clockwise",
+    label: t(`plugin.notes.sort.${sort}`),
+    checked: prefs.sort === sort,
+    run: () => {
+      prefs.sort = sort;
+      savePrefs();
+      renderColumn();
+    },
+  }));
+}
 
-function pickFolder(path, kind) {
-  const dialog = el("nt-picker");
-  el("nt-picker-title").textContent = t("plugin.notes.move.title", { name: kind === "note" ? titleOf(path) : baseOf(path) });
+/* ---- Windows: "Move to…", "Ask an agent" ------------------------------------- */
+
+function openModal(id) {
+  const modal = el(id);
+  modal.classList.remove("hidden");
+  modal.querySelector("select, textarea, input, button:not(.modal-close)")?.focus({ preventScroll: true });
+}
+
+function closeModal(id) {
+  el(id).classList.add("hidden");
+}
+
+/** Wires everything that dismisses a window: its cross, its Cancel, a click on the veil, Escape. */
+function bindModal(id, onClose) {
+  const modal = el(id);
+  for (const button of modal.querySelectorAll(".modal-close, .modal-cancel")) button.addEventListener("click", onClose);
+  modal.addEventListener("mousedown", (e) => {
+    if (e.target === modal) onClose();
+  });
+  modal.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      e.stopPropagation();
+      onClose();
+    }
+  });
+}
+
+function openMoveModal(path, kind) {
+  el("nt-move-title").textContent = t("plugin.notes.move.title", { name: kind === "note" ? titleOf(path) : baseOf(path) });
   const rows = [];
   const add = (folder, depth) => {
     // A folder goes neither into itself nor into what it holds.
     if (kind === "folder" && isInside(folder, path)) return;
-    const button = h("button", "nt-picker-row");
+    const button = h("button", "nt-row");
     button.type = "button";
     button.style.setProperty("--nt-depth", String(depth));
-    button.append(iconNode(folder ? "folder" : "notebook"), h("span", "", folder ? baseOf(folder) : t("plugin.notes.root")));
-    button.disabled = folder === parentOf(path);
+    button.append(h("span", "nt-caret-gap"), iconNode(folder ? "folder" : "notebook"), h("span", "nt-name", folder ? baseOf(folder) : t("plugin.notes.root")));
+    if (folder === parentOf(path)) {
+      button.disabled = true;
+      button.appendChild(h("span", "nt-count", t("plugin.notes.move.here")));
+    }
     button.addEventListener("click", () => {
-      dialog.close();
+      closeModal("nt-move");
       void moveTo(path, folder, kind);
     });
     rows.push(button);
-    for (const sub of folders.get(folder)?.folders ?? []) add(sub, depth + 1);
+    for (const sub of [...(folders.get(folder)?.folders ?? [])].sort(byName)) add(sub, depth + 1);
   };
   add("", 0);
-  el("nt-picker-list").replaceChildren(...rows);
-  dialog.showModal();
+  el("nt-move-list").replaceChildren(...rows);
+  openModal("nt-move");
+}
+
+/** The agents one may ask, as the core knows them. */
+function agentChoices() {
+  return (core.state?.agents ?? []).filter((a) => a && typeof a.id === "string" && a.name);
+}
+
+/** A message under a field of a window (CLAUDE.md, "Messages about a field"). */
+function fieldError(input, message) {
+  const old = input.parentElement.querySelector(".field-error");
+  old?.remove();
+  input.classList.toggle("is-invalid", Boolean(message));
+  input.removeAttribute("aria-describedby");
+  if (!message) return;
+  const note = h("p", "field-error", message);
+  note.id = `${input.id}-error`;
+  input.setAttribute("aria-describedby", note.id);
+  input.after(note);
+  input.addEventListener("input", () => fieldError(input, ""), { once: true });
+}
+
+let asking = null;
+
+function renderAskScope() {
+  const scope = asking?.scope ?? "note";
+  for (const button of el("nt-ask-scope").querySelectorAll("button")) {
+    button.classList.toggle("active", button.dataset.scope === scope);
+    button.disabled = button.dataset.scope === "selection" && !asking?.selection;
+  }
+  el("nt-ask-what-note").textContent = t(asking?.selection ? "plugin.notes.ask.whatNote" : "plugin.notes.ask.noSelection");
+  const attach = el("nt-ask-attach");
+  attach.replaceChildren(iconNode("note"), h("span"));
+  const body = scope === "selection" ? asking.selection : asking?.text ?? "";
+  const count = tn("plugin.notes.words", wordsOf(plainText(body)));
+  attach.lastChild.innerHTML =
+    scope === "selection"
+      ? core.escapeHtml(t("plugin.notes.ask.attachSelection", { count }))
+      : t("plugin.notes.ask.attachNote", { title: `<b>${core.escapeHtml(asking?.title ?? "")}</b>`, count: core.escapeHtml(count) });
+}
+
+async function openAsk(path = current?.path) {
+  if (!path || !notes.has(path)) return;
+  const agents = agentChoices();
+  if (!agents.length) return toast(t("plugin.notes.ask.noAgent"), "ko");
+  if (current?.path === path) await flush();
+  let text;
+  try {
+    text = await textOf(path);
+  } catch (err) {
+    return toast(t("plugin.notes.error", { message: err.message }), "ko");
+  }
+  const selection = current?.path === path ? selectionText : "";
+  asking = { path, title: titleOf(path), text, selection, scope: selection ? "selection" : "note" };
+  el("nt-ask-note").textContent = asking.title;
+  const select = el("nt-ask-agent");
+  select.replaceChildren(
+    ...agents.map((agent) => {
+      const option = h("option", "", agent.name);
+      option.value = agent.id;
+      return option;
+    }),
+  );
+  const wanted = [prefs.askAgent, core.state?.currentAgentId].find((id) => agents.some((a) => a.id === id));
+  if (wanted) select.value = wanted;
+  const prompt = el("nt-ask-prompt");
+  prompt.value = prefs.askPrompt ?? t("plugin.notes.ask.defaultPrompt");
+  fieldError(prompt, "");
+  renderAskScope();
+  openModal("nt-ask-modal");
+  prompt.focus();
+  prompt.select();
+}
+
+async function sendAsk() {
+  if (!asking) return;
+  const prompt = el("nt-ask-prompt");
+  const request = prompt.value.trim();
+  if (!request) return fieldError(prompt, t("plugin.notes.ask.required"));
+  const agentId = el("nt-ask-agent").value;
+  const agent = agentChoices().find((a) => a.id === agentId);
+  if (!agent) return toast(t("plugin.notes.ask.noAgent"), "ko");
+  const body = asking.scope === "selection" ? asking.selection : asking.text;
+  const text = `${request}\n\n${t("plugin.notes.ask.message", { title: asking.title })}\n\n${body}`;
+  const send = el("nt-ask-send");
+  send.disabled = true;
+  try {
+    await core.sendToAgent(agentId, text);
+    prefs.askAgent = agentId;
+    prefs.askPrompt = request;
+    savePrefs();
+    closeModal("nt-ask-modal");
+    asking = null;
+    toast(t("plugin.notes.ask.sent", { agent: agent.name }));
+    // The conversation beside the note; on a phone, in its own window.
+    if (isPhone()) core.openTab(agentId, "chat");
+    else core.openSplit(agentId, "chat");
+  } catch (err) {
+    toast(t("plugin.notes.ask.failed", { message: err.message }), "ko");
+  } finally {
+    send.disabled = false;
+  }
+}
+
+/** The passage selected in the document, kept while the focus goes to a button. */
+function trackSelection() {
+  if (!current) return;
+  const selection = window.getSelection?.();
+  const node = selection?.anchorNode;
+  if (!node || !el("nt-doc").contains(node)) return;
+  selectionText = selection.isCollapsed ? "" : selection.toString().trim();
 }
 
 /* ---- Actions ------------------------------------------------------------------ */
@@ -853,10 +1235,10 @@ async function refresh() {
   } catch (err) {
     toast(t("plugin.notes.error", { message: err.message }), "ko");
   }
-  if (isFolderView() && !folders.has(prefs.view)) prefs.view = ALL;
-  if (prefs.view === PINNED && !meta.pinned.some((p) => notes.has(p))) prefs.view = ALL;
-  renderFolders();
-  renderList();
+  if (!folders.has(prefs.folder)) prefs.folder = "";
+  renderColumn();
+  if (place === BIN) renderTrash();
+  showNote();
   await syncCurrent();
 }
 
@@ -895,6 +1277,9 @@ function freeName(folder, base, ext = "") {
   return name;
 }
 
+/** Whether `name` is free in `folder` (another case of the same name is the same file to some file systems). */
+const isFree = (folder, name) => freeName(folder, name.replace(/\.md$/i, ""), /\.md$/i.test(name) ? ".md" : "") === name;
+
 async function attempt(job) {
   try {
     return await job();
@@ -905,24 +1290,27 @@ async function attempt(job) {
   }
 }
 
-async function createNote({ folder = isFolderView() ? prefs.view : "", title = "", content = "", focus = "title" } = {}) {
+/** Opens the tree on `folder` (its ancestors too). */
+function unfold(folder) {
+  prefs.collapsed = prefs.collapsed.filter((p) => !isInside(folder, p));
+}
+
+async function createNote({ folder = prefs.folder, title = "", content = "", focus = "title" } = {}) {
   if (!folders.has(folder)) folder = "";
   const path = joinPath(folder, freeName(folder, cleanName(title) || t("plugin.notes.note.untitled"), ".md"));
   return attempt(async () => {
     await share.write(full(path), content);
-    if (query || (prefs.view !== ALL && prefs.view !== folder)) {
-      query = "";
-      el("nt-search").value = "";
-      prefs.view = folder || ALL;
-    }
-    prefs.collapsed = prefs.collapsed.filter((p) => !isInside(folder, p));
+    if (query) clearSearch();
+    unfold(folder);
+    prefs.folder = folder;
     await refresh();
     await openNote(path, { focus });
     return path;
   });
 }
 
-async function createFolder(parent = isFolderView() ? prefs.view : "") {
+async function createFolder(parent = prefs.folder) {
+  if (!folders.has(parent)) parent = "";
   const typed = await core.prompt({
     title: parent ? t("plugin.notes.folder.newIn", { name: baseOf(parent) }) : t("plugin.notes.folder.newTitle"),
     okLabel: t("plugin.notes.create"),
@@ -930,22 +1318,25 @@ async function createFolder(parent = isFolderView() ? prefs.view : "") {
   });
   const name = cleanName(typed);
   if (!name) return;
-  if (freeName(parent, name) !== name) return toast(t("plugin.notes.exists", { name }), "ko");
+  if (!isFree(parent, name)) return toast(t("plugin.notes.exists", { name }), "ko");
   const path = joinPath(parent, name);
   await attempt(async () => {
     await share.mkdir(full(path));
-    prefs.collapsed = prefs.collapsed.filter((p) => p !== parent);
-    prefs.view = path;
+    if (query) clearSearch();
+    unfold(path);
+    prefs.folder = path;
     savePrefs();
     await refresh();
+    renderWhere();
+    flashRow("folder", path);
   });
 }
 
-/** Everything that names `from` now names `to`: the pins, the note open, the view, the folded folders. */
+/** Everything that names `from` now names `to`: the pins, the note open, the folder shown, the folded folders. */
 function follow(from, to) {
   meta.pinned = meta.pinned.map((p) => rebase(p, from, to));
   prefs.collapsed = prefs.collapsed.map((p) => rebase(p, from, to));
-  if (isFolderView()) prefs.view = rebase(prefs.view, from, to);
+  prefs.folder = rebase(prefs.folder, from, to);
   if (prefs.note) prefs.note = rebase(prefs.note, from, to);
   if (current) current.path = rebase(current.path, from, to);
   for (const [path, known] of [...contents]) {
@@ -977,15 +1368,22 @@ async function relocate(from, to) {
   } else await move();
 }
 
+/** Moves `path` into `folder` ("" the root); the tree opens on the destination and shows the row. */
 async function moveTo(path, folder, kind) {
   if (parentOf(path) === folder || !folders.has(folder)) return;
   if (kind === "folder" && isInside(folder, path)) return;
   const name = baseOf(path);
-  if (freeName(folder, name) !== name) return toast(t("plugin.notes.exists", { name: kind === "note" ? titleOf(name) : name }), "ko");
+  if (!isFree(folder, name)) return toast(t("plugin.notes.exists", { name: kind === "note" ? titleOf(name) : name }), "ko");
+  const to = joinPath(folder, name);
   await attempt(async () => {
-    await relocate(path, joinPath(folder, name));
+    await relocate(path, to);
+    if (query) clearSearch();
+    unfold(folder);
+    if (kind === "folder") prefs.folder = to;
+    else if (!current) prefs.folder = folder;
     await refresh();
-    showNote();
+    renderWhere();
+    flashRow(kind, to);
     toast(t("plugin.notes.moved", { name: kind === "note" ? titleOf(name) : name, folder: folder ? baseOf(folder) : t("plugin.notes.root") }));
   });
 }
@@ -1002,15 +1400,13 @@ async function renameCurrent() {
     return;
   }
   const folder = parentOf(note.path);
-  // Another case of the same name is the same file to some file systems: the name itself is not "taken".
-  if (wanted.toLowerCase() !== before.toLowerCase() && freeName(folder, wanted, ".md") !== `${wanted}.md`) {
+  if (wanted.toLowerCase() !== before.toLowerCase() && !isFree(folder, `${wanted}.md`)) {
     input.value = before;
     return toast(t("plugin.notes.exists", { name: wanted }), "ko");
   }
   await attempt(async () => {
     await relocate(note.path, joinPath(folder, `${wanted}.md`));
     await refresh();
-    showNote();
   });
   if (current === note) input.value = titleOf(note.path);
 }
@@ -1025,19 +1421,17 @@ async function renameFolder(path) {
   const name = cleanName(typed);
   if (!name || name === before) return;
   const parent = parentOf(path);
-  if (name.toLowerCase() !== before.toLowerCase() && freeName(parent, name) !== name) return toast(t("plugin.notes.exists", { name }), "ko");
+  if (name.toLowerCase() !== before.toLowerCase() && !isFree(parent, name)) return toast(t("plugin.notes.exists", { name }), "ko");
   await attempt(async () => {
     await relocate(path, joinPath(parent, name));
     await refresh();
-    showNote();
+    renderWhere();
   });
 }
 
 async function togglePin(path) {
   meta.pinned = isPinned(path) ? meta.pinned.filter((p) => p !== path) : [...meta.pinned.filter((p) => notes.has(p)), path];
-  if (prefs.view === PINNED && !meta.pinned.length) prefs.view = ALL;
-  renderFolders();
-  renderList();
+  renderColumn();
   await saveMeta();
 }
 
@@ -1047,6 +1441,7 @@ async function duplicateNote(path) {
     const folder = parentOf(path);
     const copy = joinPath(folder, freeName(folder, titleOf(path), ".md"));
     await share.write(full(copy), text);
+    unfold(folder);
     await refresh();
     await openNote(copy, { focus: "title" });
   });
@@ -1073,6 +1468,34 @@ async function download(path) {
 
 /* ---- The bin -------------------------------------------------------------------- */
 
+function renderTrash() {
+  const list = el("nt-trash");
+  if (!trash.length) return list.replaceChildren(h("p", "nt-trash-empty", t("plugin.notes.trash.none")));
+  list.replaceChildren(
+    ...trash.map((entry) => {
+      const row = h("div", "nt-trash-row");
+      row.setAttribute("role", "listitem");
+      const info = meta.trash[entry.name];
+      const text = h("div", "nt-trash-text");
+      text.appendChild(h("span", "nt-trash-title", entry.type === "dir" ? entry.name : titleOf(entry.name)));
+      const sub = h("span", "nt-trash-sub");
+      sub.appendChild(h("span", "", t("plugin.notes.trash.deleted", { date: core.formatDateTime(info?.at ?? entry.modifiedAt) })));
+      if (info?.from) sub.appendChild(h("span", "", folderLabel(info.from)));
+      text.appendChild(sub);
+      const restore = h("button", "secondary");
+      restore.type = "button";
+      restore.innerHTML = `${iconSvg("arrow-counter-clockwise")}<span>${core.escapeHtml(t("plugin.notes.trash.restore"))}</span>`;
+      restore.addEventListener("click", () => void restoreEntry(entry));
+      const erase = h("button", "danger");
+      erase.type = "button";
+      erase.innerHTML = `${iconSvg("trash")}<span>${core.escapeHtml(t("plugin.notes.trash.erase"))}</span>`;
+      erase.addEventListener("click", () => void eraseEntry(entry));
+      row.append(iconNode(entry.type === "dir" ? "folder" : "note"), text, restore, erase);
+      return row;
+    }),
+  );
+}
+
 /** To the bin of the notepad, remembering where it was. */
 async function toTrash(path) {
   const base = baseOf(path);
@@ -1087,6 +1510,7 @@ async function toTrash(path) {
   await share.move(full(path), full(joinPath(TRASH, name)));
   meta.trash[name] = { from: parentOf(path), at: new Date().toISOString() };
   meta.pinned = meta.pinned.filter((p) => !isInside(p, path));
+  if (isInside(prefs.folder, path)) prefs.folder = parentOf(path);
   await saveMeta();
 }
 
@@ -1122,10 +1546,13 @@ async function restoreEntry(entry) {
     // Its name of before the bin: "Title (2).md" was "Title.md".
     const original = entry.name.replace(/ \(\d+\)(?=(\.md)?$)/i, "");
     const name = isNote ? freeName(folder, titleOf(original), ".md") : freeName(folder, original);
-    await share.move(full(joinPath(TRASH, entry.name)), full(joinPath(folder, name)));
+    const to = joinPath(folder, name);
+    await share.move(full(joinPath(TRASH, entry.name)), full(to));
     delete meta.trash[entry.name];
     await saveMeta();
+    unfold(folder);
     await refresh();
+    flashRow(isNote ? "note" : "folder", to);
     toast(t("plugin.notes.trash.restored", { name: isNote ? titleOf(name) : name, folder: folder ? baseOf(folder) : t("plugin.notes.root") }));
   });
 }
@@ -1173,13 +1600,14 @@ async function activate() {
   const ready = Boolean(Allkin.capability("markdown-editor"));
   el("nt-missing").classList.toggle("hidden", ready);
   if (!ready) return;
+  applyColumn();
   await refresh();
   if (started) return;
   started = true;
-  // Back on the note left last time — on a phone the list comes first.
+  // Back on the note left last time — on a phone the column comes first.
   if (!isPhone() && prefs.note && notes.has(prefs.note)) await openNote(prefs.note);
   else showNote();
-  if (isPhone()) setPane("list");
+  if (isPhone()) setPane("column");
 }
 
 function open() {
@@ -1225,21 +1653,26 @@ Allkin.registerApp({
 /* ---- Wiring ---------------------------------------------------------------------- */
 
 fillIcons(el("nt-view"));
+fillIcons(el("nt-move"));
+fillIcons(el("nt-ask-modal"));
 core.fillPageIcons?.(el("nt-view"));
+bindHandle();
 
 el("nt-new-note").addEventListener("click", () => void createNote());
-el("nt-new-folder").addEventListener("click", () => void createFolder());
+el("nt-fold").addEventListener("click", toggleFolded);
 el("nt-note-menu").addEventListener("click", (e) => current && openMenu(noteMenu(current.path), { anchor: e.currentTarget }));
+el("nt-ask").addEventListener("click", () => void openAsk());
 el("nt-empty-trash").addEventListener("click", () => void emptyTrash());
 el("nt-search").addEventListener("input", (e) => onSearch(e.target.value));
-el("nt-sort").addEventListener("change", (e) => {
-  prefs.sort = e.target.value;
-  savePrefs();
-  renderList();
+el("nt-search").addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && e.target.value) {
+    e.stopPropagation();
+    clearSearch();
+  }
 });
 el("nt-back").addEventListener("click", () => {
-  if (el("nt-view").dataset.pane === "note") void flush();
-  setPane(el("nt-view").dataset.pane === "note" ? "list" : "folders");
+  void flush();
+  setPane("column");
 });
 
 el("nt-title").addEventListener("change", () => void renameCurrent());
@@ -1253,11 +1686,17 @@ el("nt-title").addEventListener("keydown", (e) => {
   }
 });
 
-// Ctrl/⌘ + S writes at once: the note saves itself, the habit stays.
-el("nt-view").addEventListener("keydown", (e) => {
-  if ((e.ctrlKey || e.metaKey) && !e.altKey && e.key.toLowerCase() === "s") {
+// Ctrl/⌘ + S writes at once (the note saves itself, the habit stays);
+// Ctrl/⌘ + ⇧ + L folds the column. Wherever the focus is, while the tab shows.
+document.addEventListener("keydown", (e) => {
+  if (!(e.ctrlKey || e.metaKey) || e.altKey || core.activeTab()?.kind !== KIND) return;
+  const key = e.key.toLowerCase();
+  if (key === "s") {
     e.preventDefault();
     void flush();
+  } else if (key === "l" && e.shiftKey && !isPhone()) {
+    e.preventDefault();
+    toggleFolded();
   }
 });
 
@@ -1269,10 +1708,20 @@ el("nt-missing-open").addEventListener("click", async () => {
   }
 });
 
-el("nt-picker-cancel").addEventListener("click", () => el("nt-picker").close());
-el("nt-picker").addEventListener("click", (e) => {
-  // A click on the backdrop closes.
-  if (e.target === e.currentTarget) e.currentTarget.close();
+bindModal("nt-move", () => closeModal("nt-move"));
+bindModal("nt-ask-modal", () => {
+  closeModal("nt-ask-modal");
+  asking = null;
+});
+el("nt-ask-form").addEventListener("submit", (e) => {
+  e.preventDefault();
+  void sendAsk();
+});
+el("nt-ask-scope").addEventListener("click", (e) => {
+  const button = e.target.closest("button[data-scope]");
+  if (!button || button.disabled || !asking) return;
+  asking.scope = button.dataset.scope;
+  renderAskScope();
 });
 
 document.addEventListener("mousedown", (e) => {
@@ -1281,6 +1730,7 @@ document.addEventListener("mousedown", (e) => {
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") closeMenu();
 });
+document.addEventListener("selectionchange", trackSelection);
 window.addEventListener("resize", closeMenu);
 window.addEventListener("blur", closeMenu);
 

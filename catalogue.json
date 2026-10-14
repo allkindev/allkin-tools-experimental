@@ -3,123 +3,6 @@
   "channel": "experimental",
   "plugins": [
     {
-      "id": "creator",
-      "name": "Creator",
-      "version": "1.0.8",
-      "description": "L'agent qui fabrique des outils pour Allkin : décris ce que tu veux, il te pose ses questions dans un formulaire, écrit l'outil, le service ou la compétence selon le standard, le contrôle et le met au point avec toi.",
-      "author": "Allkin",
-      "permissions": [
-        {
-          "id": "agent",
-          "reason": "Creator est un agent : tu lui parles comme à tout agent d'Allkin, et c'est lui qui écrit les fichiers, dans son dossier de travail et nulle part ailleurs."
-        },
-        {
-          "id": "repository",
-          "reason": "Le dossier de travail de l'agent devient un dépôt local : ce qu'il y écrit apparaît dans les pages Outils, Services et Compétences, et s'installe depuis là."
-        },
-        {
-          "id": "network",
-          "reason": "L'agent lit la documentation en ligne des API pour écrire un service ou un outil qui s'y connecte."
-        }
-      ],
-      "service": false,
-      "web": false,
-      "ui": false,
-      "agent": {
-        "name": "Creator"
-      },
-      "icon": "icon.svg",
-      "validation": {
-        "status": "pending"
-      },
-      "locales": {
-        "en": {
-          "name": "Creator",
-          "description": "The agent that builds tools for Allkin: describe what you want, it asks its questions in a form, writes the tool, the service or the competence to the standard, checks it and debugs it with you.",
-          "permissions": {
-            "agent": "Creator is an agent: you talk to it like to any Allkin agent, and it writes the files, in its working folder and nowhere else.",
-            "repository": "The agent's working folder becomes a local repository: what it writes there appears in the Tools, Services and Competences pages and installs from there.",
-            "network": "The agent reads the online documentation of APIs to write a service or a tool that connects to them."
-          }
-        },
-        "es": {
-          "name": "Creator",
-          "description": "El agente que fabrica herramientas para Allkin: describe lo que quieres, te hace sus preguntas en un formulario, escribe la herramienta, el servicio o la competencia según el estándar, la comprueba y la depura contigo.",
-          "permissions": {
-            "agent": "Creator es un agente: le hablas como a cualquier agente de Allkin, y es él quien escribe los archivos, en su carpeta de trabajo y en ningún otro sitio.",
-            "repository": "La carpeta de trabajo del agente se convierte en un repositorio local: lo que escribe allí aparece en las páginas Herramientas, Servicios y Competencias, y se instala desde allí.",
-            "network": "El agente lee la documentación en línea de las API para escribir un servicio o una herramienta que se conecte a ellas."
-          }
-        },
-        "de": {
-          "name": "Creator",
-          "description": "Der Agent, der Tools für Allkin baut: Beschreibe, was du willst, er stellt seine Fragen in einem Formular, schreibt das Tool, den Dienst oder die Fähigkeit nach dem Standard, prüft es und debuggt es mit dir.",
-          "permissions": {
-            "agent": "Creator ist ein Agent: Du sprichst mit ihm wie mit jedem Allkin-Agenten, und er schreibt die Dateien – in seinem Arbeitsordner und nirgendwo sonst.",
-            "repository": "Der Arbeitsordner des Agenten wird zu einem lokalen Repository: Was er dort schreibt, erscheint auf den Seiten Tools, Dienste und Fähigkeiten und wird von dort installiert.",
-            "network": "Der Agent liest die Online-Dokumentation von APIs, um einen Dienst oder ein Tool zu schreiben, das sich damit verbindet."
-          }
-        }
-      },
-      "files": [
-        {
-          "path": "README-DE.md",
-          "size": 3465,
-          "sha256": "7e01989d891308db9ba92e5cf7175decf537f3b8e16752bed8800ab13dcac872"
-        },
-        {
-          "path": "README-EN.md",
-          "size": 3054,
-          "sha256": "726b05e71dc04a401411718e7ce5309632e568bdee37efe08634bc73cfd7c985"
-        },
-        {
-          "path": "README-ES.md",
-          "size": 3335,
-          "sha256": "8632c8857d81580b85bf9f5aa7b88c54ee6584beb70875ee39661413f67175d2"
-        },
-        {
-          "path": "README.md",
-          "size": 3345,
-          "sha256": "af55ad08bf844b3b81216b3f7f87709ad06d599be4017e332f9fa62cf3bc586b"
-        },
-        {
-          "path": "agent.md",
-          "size": 5739,
-          "sha256": "e1944bc3aa3b98f32fd57016129a5221fa1ac7281d96cd53b10dad413e9cb500"
-        },
-        {
-          "path": "icon.svg",
-          "size": 557,
-          "sha256": "f2029272ab021ed10daa5268a0380e29af1c91ebb6e46d0dfc02b250a22bc158"
-        },
-        {
-          "path": "plugin.json",
-          "size": 3749,
-          "sha256": "560372b5a287794e5a83a9cabd9cb4f0a2c51859eb97abfc5118e26d5b4c7f8a"
-        },
-        {
-          "path": "standard/PLUGIN-STANDARD.md",
-          "size": 18364,
-          "sha256": "3f984c29b1b379237694e91336eb2c786df487a569035f113c2ab4623c6f41b5"
-        },
-        {
-          "path": "standard/SERVICE-STANDARD.md",
-          "size": 9469,
-          "sha256": "b8ff08ce01c8c6d6e5215b024a869343dae984e0fccf0ad83677c38212d21450"
-        },
-        {
-          "path": "standard/SKILL-STANDARD.md",
-          "size": 5485,
-          "sha256": "f74c9c970a0a15d2c551c1446e72ae344796a16d498dcab03c26b9c85214fc84"
-        },
-        {
-          "path": "validation.json",
-          "size": 24,
-          "sha256": "fa4f05341a991367c51dd2d84214bcee5d6cb3a111e56f96ccb9a5a3c261ac65"
-        }
-      ]
-    },
-    {
       "id": "home-assistant-bridge",
       "name": "Pont Home Assistant",
       "version": "1.0.3",
@@ -214,8 +97,8 @@
     {
       "id": "notes",
       "name": "Bloc-notes",
-      "version": "1.0.2",
-      "description": "Des notes rangées par dossiers, écrites dans l'éditeur markdown d'Allkin : recherche, épingles, corbeille, images. Chaque note est un fichier .md du dossier partagé, que les agents lisent et écrivent aussi.",
+      "version": "1.0.3",
+      "description": "Des notes rangées par dossiers, écrites dans l'éditeur markdown d'Allkin : un arbre de dossiers et de notes, recherche, épingles, corbeille, images, et « Demander à un agent » pour envoyer une note dans une conversation. Chaque note est un fichier .md du dossier partagé, que les agents lisent et écrivent aussi.",
       "author": "Allkin",
       "permissions": [
         {
@@ -236,21 +119,21 @@
       "locales": {
         "en": {
           "name": "Notes",
-          "description": "Notes filed in folders, written in Allkin's Markdown editor: search, pins, bin, images. Each note is a .md file of the shared folder, which the agents read and write too.",
+          "description": "Notes filed in folders, written in Allkin's Markdown editor: a tree of folders and notes, search, pins, bin, images, and “Ask an agent” to send a note into a conversation. Each note is a .md file of the shared folder, which the agents read and write too.",
           "permissions": {
             "interface": "Adds the notepad to the Allkin page: its tab and its entry in the list of tools."
           }
         },
         "es": {
           "name": "Bloc de notas",
-          "description": "Notas ordenadas en carpetas, escritas en el editor Markdown de Allkin: búsqueda, notas fijadas, papelera, imágenes. Cada nota es un archivo .md de la carpeta compartida, que los agentes también leen y escriben.",
+          "description": "Notas ordenadas en carpetas, escritas en el editor Markdown de Allkin: un árbol de carpetas y notas, búsqueda, notas fijadas, papelera, imágenes y «Preguntar a un agente» para enviar una nota a una conversación. Cada nota es un archivo .md de la carpeta compartida, que los agentes también leen y escriben.",
           "permissions": {
             "interface": "Añade el bloc de notas a la página de Allkin: su pestaña y su entrada en la lista de herramientas."
           }
         },
         "de": {
           "name": "Notizen",
-          "description": "Notizen in Ordnern, geschrieben im Markdown-Editor von Allkin: Suche, angeheftete Notizen, Papierkorb, Bilder. Jede Notiz ist eine .md-Datei im gemeinsamen Ordner, die auch die Agenten lesen und schreiben.",
+          "description": "Notizen in Ordnern, geschrieben im Markdown-Editor von Allkin: ein Baum aus Ordnern und Notizen, Suche, angeheftete Notizen, Papierkorb, Bilder und „Einen Agenten fragen“, um eine Notiz in eine Unterhaltung zu schicken. Jede Notiz ist eine .md-Datei im gemeinsamen Ordner, die auch die Agenten lesen und schreiben.",
           "permissions": {
             "interface": "Fügt der Allkin-Seite den Notizblock hinzu: seinen Tab und seinen Eintrag in der Tool-Liste."
           }
@@ -259,23 +142,23 @@
       "files": [
         {
           "path": "README-DE.md",
-          "size": 4894,
-          "sha256": "3a7d324e326b8f1275634f24f7d1be47e18699c4656e47d2b9c41481d6f80cd3"
+          "size": 6993,
+          "sha256": "5ffae704fd463b18a98ca2c22ab63bb246c5fc1d957d9800e69f582de571a3cb"
         },
         {
           "path": "README-EN.md",
-          "size": 4278,
-          "sha256": "b4509c83a6adc4216e0d1052ac00c00851e1fbb8d89966bfa6cabc410b7a6348"
+          "size": 6144,
+          "sha256": "857d6957a4f0210e918035aa73da378984aa583ca4778facb91d05463c835c80"
         },
         {
           "path": "README-ES.md",
-          "size": 4701,
-          "sha256": "125289c8d202f8f1d3a850a90d139624a4fa29cd064373fdc173cc3eeb1e70fc"
+          "size": 6682,
+          "sha256": "9e6132790dc7f7420cf7e642f470b1fae45a3fbaf6171e467a61aa273f3102a2"
         },
         {
           "path": "README.md",
-          "size": 4808,
-          "sha256": "4a669e92c4ee4b9dae4e2f8798c7968f239cede21fd5224849cf45852111d0ae"
+          "size": 6881,
+          "sha256": "f0661292e735920c304a900555a90f1d256043aef9e592b7328fae29392d842a"
         },
         {
           "path": "icon.svg",
@@ -284,23 +167,23 @@
         },
         {
           "path": "locales.js",
-          "size": 19866,
-          "sha256": "61c07caaa0b0f6fb3650e5faaed3c6ffd89abdf21163beff287305a547c6a2ca"
+          "size": 25345,
+          "sha256": "35d9d019eb9fd6ac8f048cfc536cafc3f8ce3ae8190836dd924d4a3950cb3690"
         },
         {
           "path": "notes.css",
-          "size": 13237,
-          "sha256": "ec82b1e5db68e478057dcd49c1c6652775e3c619533f01bef82939d2bc0e84d0"
+          "size": 15960,
+          "sha256": "dab8755c2247e13f30f3cf629082b8b0ee65fb9eb3cfbea4d1d5da505be1298b"
         },
         {
           "path": "notes.js",
-          "size": 54770,
-          "sha256": "22c831bcfa19779b35889464b2fe7e6a928e546fb8b6c37c676724744609bdb4"
+          "size": 73299,
+          "sha256": "aa836499bccf7e5cc70ccaffaa02f465671121612da24a4e7e5b0fb5bf0cfd61"
         },
         {
           "path": "plugin.json",
-          "size": 1993,
-          "sha256": "af399bac1a8a8552f4cb160de5af3ed0f5de2311ba5198b7e93684f6d19aaef7"
+          "size": 2403,
+          "sha256": "dcc09060e553b86804b705e882651af219fb2356862b01f373b28461a58ad27b"
         },
         {
           "path": "validation.json",
@@ -309,15 +192,15 @@
         },
         {
           "path": "view.html",
-          "size": 4640,
-          "sha256": "24c5c8c0f67e344338facff2c019f3437522cd980f12ac9c777f1c1ece7657e1"
+          "size": 7346,
+          "sha256": "4b76319268dd7a981e6f3edf94747c082fbe51c7a60fbe2a5ec32bd388520178"
         }
       ]
     },
     {
       "id": "recordr",
       "name": "Recordr",
-      "version": "1.0.5",
+      "version": "1.0.6",
       "description": "Écoute le micro, transcrit ce qui se dit au fil de la parole et distingue les interlocuteurs. La reconnaissance est faite par le service audio que tu choisis.",
       "author": "Allkin",
       "permissions": [
@@ -385,7 +268,7 @@
         {
           "path": "plugin.json",
           "size": 5919,
-          "sha256": "e4404f5e3d36d0be62cecdeb92d18c490f93f68302cc719bfb0a67a1fb89374f"
+          "sha256": "be01e1784d46a0e1781a4390959550bc60c13d64d169dc20fda492645de47245"
         },
         {
           "path": "server.mjs",
@@ -419,8 +302,8 @@
         },
         {
           "path": "web/style.css",
-          "size": 25040,
-          "sha256": "5b21bc06406cc01c13aebb92fe7568088c38dd21eb20038a38bd7000c62fee43"
+          "size": 25039,
+          "sha256": "32e3822d8c8a39017120cd1402813f1f48534303228a3e51836fb65f9c7bc782"
         },
         {
           "path": "web/worklet.js",
@@ -533,9 +416,10 @@
     {
       "id": "clear-answers",
       "name": "clear-answers",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "description": "Use for every answer longer than a few lines, and whenever the user asks to shorten, clarify, restructure or \"make it readable\". Rules for answers that are read once on a screen or a phone: the point first, short sentences, lists for parallel items, no padding.",
       "author": "Allkin",
+      "category": "writing",
       "validation": {
         "status": "pending"
       },
@@ -585,8 +469,8 @@
         },
         {
           "path": "skill.json",
-          "size": 1035,
-          "sha256": "239e022e63fdbe4c8e7912a53edce3debb3cb8d6fdca2c67b23048c78bb6ab1a"
+          "size": 1060,
+          "sha256": "c51cdb1f6f013c5f7dd578544ff71276495d853794bd3769ff5277d031ac5de9"
         },
         {
           "path": "validation.json",
@@ -598,9 +482,10 @@
     {
       "id": "code-review",
       "name": "code-review",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "description": "Use when the user asks to review, check, audit or critique code, a diff, a pull request or a script, or asks \"is this correct / safe / good\". Produces findings ranked by severity, each with the line and a concrete failure case.",
       "author": "Allkin",
+      "category": "code",
       "validation": {
         "status": "pending"
       },
@@ -650,8 +535,8 @@
         },
         {
           "path": "skill.json",
-          "size": 905,
-          "sha256": "50d7031527b7beedb8a07477e685199e656f4fa8bdbd543891296782ef50c26f"
+          "size": 927,
+          "sha256": "95f615b9f3f2b4408066c6b009d3533d99eae400910d09a91e389439a4043b47"
         },
         {
           "path": "validation.json",
@@ -663,9 +548,10 @@
     {
       "id": "email-drafting",
       "name": "email-drafting",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "description": "Use when the user asks to write, reply to, rephrase or soften an e-mail, a letter or a message to someone — a client, a supplier, a colleague, an administration. Produces a ready-to-send draft with subject line, in the right register.",
       "author": "Allkin",
+      "category": "communication",
       "validation": {
         "status": "pending"
       },
@@ -715,8 +601,8 @@
         },
         {
           "path": "skill.json",
-          "size": 992,
-          "sha256": "db4b73a0462ead2d612d47e23243c2a32c1c804ec050822e9813103578aa3c5f"
+          "size": 1023,
+          "sha256": "dc2110ea9b7ba720c9a0ba828fc22e37fdd316bbe5e8c59cb5ede7e435170e28"
         },
         {
           "path": "validation.json",
@@ -728,9 +614,10 @@
     {
       "id": "incident-report",
       "name": "incident-report",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "description": "Use when something is broken or slow on a machine or a service — \"it does not work\", \"the site is down\", \"the disk is full\", an error in a log — and the user wants it diagnosed, fixed or written up. Drives a step-by-step diagnosis and produces an incident report.",
       "author": "Allkin",
+      "category": "operations",
       "validation": {
         "status": "pending"
       },
@@ -780,8 +667,8 @@
         },
         {
           "path": "skill.json",
-          "size": 1020,
-          "sha256": "fcade6a7ef52a47a3e0f34271d5c46deddc69fe8dbbe640dfafd2a2c9fb309b7"
+          "size": 1048,
+          "sha256": "a552e6f9c16bec6c63d4b7d7e6fdebef96ebc870a07b7731d6069e22d10f3733"
         },
         {
           "path": "validation.json",
@@ -793,9 +680,10 @@
     {
       "id": "markdown-tables",
       "name": "markdown-tables",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "description": "Use when the answer compares several items along the same criteria, lists options with their properties, or when the user asks for a table. Produces a Markdown table that reads well in Allkin's conversation.",
       "author": "Allkin",
+      "category": "writing",
       "validation": {
         "status": "pending"
       },
@@ -845,8 +733,8 @@
         },
         {
           "path": "skill.json",
-          "size": 939,
-          "sha256": "e2460a79875bc0faa9368861b2e33d6810e4eab327acd0dafa6199346d4cb245"
+          "size": 964,
+          "sha256": "968e0982e070f2de89b29783f634b97c1dbc915d9c49c1c0712099158cf5329b"
         },
         {
           "path": "validation.json",
@@ -858,9 +746,10 @@
     {
       "id": "meeting-notes",
       "name": "meeting-notes",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "description": "Use when the user hands over a transcript, a recording's text or rough notes of a meeting and wants minutes, a summary, the decisions or the action items. Produces structured minutes with owners and deadlines.",
       "author": "Allkin",
+      "category": "organisation",
       "validation": {
         "status": "pending"
       },
@@ -910,8 +799,8 @@
         },
         {
           "path": "skill.json",
-          "size": 969,
-          "sha256": "48d4cb6e9fbd38d18570096fd8bf329b5c53f5202cb11dfc7fa7a7f8057749c7"
+          "size": 999,
+          "sha256": "e8f87ea40cab6e9932282d291c17a0693f790382cb6e194cd32ab7ebc90342d1"
         },
         {
           "path": "validation.json",
@@ -923,9 +812,10 @@
     {
       "id": "project-plan",
       "name": "project-plan",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "description": "Use when the user states a goal, a project or a piece of work to organise and wants a plan, milestones, a task list, a schedule or a risk review. Produces a plan file that can be followed and updated.",
       "author": "Allkin",
+      "category": "organisation",
       "validation": {
         "status": "pending"
       },
@@ -975,8 +865,8 @@
         },
         {
           "path": "skill.json",
-          "size": 862,
-          "sha256": "c5789c0a13523534b76103adf8e075cb33ab5e1dac40945acbf367377f350886"
+          "size": 892,
+          "sha256": "7a886d91f3df4863d6ae921ee55dcbecd054c8b8034d238c111f63b45ec073f2"
         },
         {
           "path": "validation.json",
@@ -988,9 +878,10 @@
     {
       "id": "research-brief",
       "name": "research-brief",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "description": "Use when the user asks to look something up, compare products or options, check a fact, find out \"what is the state of\", or wants a summary of what is known on a topic. Needs web access. Produces a short brief with sources, dated.",
       "author": "Allkin",
+      "category": "analysis",
       "validation": {
         "status": "pending"
       },
@@ -1040,8 +931,8 @@
         },
         {
           "path": "skill.json",
-          "size": 1053,
-          "sha256": "2b06a7b4fb71b88de0235118cd4b65eea82fcfacac97d049e3d26281d02c7cd8"
+          "size": 1079,
+          "sha256": "d3e490d8cc0ecd06210882d1442398ed2b4e77222372249278b8c03cd1184e95"
         },
         {
           "path": "validation.json",
