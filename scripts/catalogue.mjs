@@ -54,6 +54,10 @@ const ID_PATTERN = /^[a-z0-9](?:[a-z0-9-]{0,62}[a-z0-9])?$/;
    1 à chaque modification du plugin (voir CREER-UN-PLUGIN.md). Allkin compare
    les versions nombre par nombre : « 1.0008 » y vaudrait 1.8. */
 const VERSION_PATTERN = /^1\.0\.(?:0|[1-9]\d*)$/;
+/* The categories of the Competences page of Allkin (skills-store.ts carries
+   the same list, 2026-10-14): a skill names one in its skill.json; without
+   one it goes under "other". */
+const SKILL_CATEGORIES = new Set(["writing", "code", "analysis", "communication", "organisation", "operations", "other"]);
 const SEGMENT_PATTERN = /^[A-Za-z0-9_][A-Za-z0-9._-]*$/;
 const KNOWN_PERMISSIONS = new Set(["network", "filesystem", "exec", "root", "agents", "interface", "agent", "repository"]);
 const IGNORED = new Set(["node_modules", ".git", ".DS_Store"]);
@@ -252,9 +256,10 @@ const services = existsSync(SERVICES_DIR)
 
 /* Skills (see SKILL-STANDARD.md): a folder skills/<id>/ holding a standard
    SKILL.md (header `name` / `description`, then the procedure), Allkin's own
-   skill.json (version 1.0.N, author, icon, translations) and its README files.
-   Listed with its files and their digests, like a plugin: Allkin downloads
-   them one by one. The user reads a skill as a "competence". */
+   skill.json (version 1.0.N, author, icon, category, translations) and its
+   README files. Listed with its files and their digests, like a plugin;
+   Allkin downloads every skill of the catalogue at each refresh (2026-10-14):
+   none is installed one by one. The user reads a skill as a "competence". */
 const SKILLS_DIR = join(ROOT, "skills");
 
 /** The two keys of the SKILL.md header, one per line each; null when the header is missing. */
@@ -291,6 +296,8 @@ function readSkill(id) {
     return failSkill(`skill.json n'est pas un JSON valide (${err.message}).`);
   }
   if (!VERSION_PATTERN.test(String(m.version ?? ""))) failSkill("skill.json : version attendue 1.0.N (1.0.0, 1.0.1, 1.0.12…).");
+  if (m.category === undefined) warnings.push(`skills/${id} : skill.json ne donne pas de category — Allkin la rangera sous « other » (Autres).`);
+  else if (!SKILL_CATEGORIES.has(m.category)) failSkill(`skill.json : catégorie inconnue « ${m.category} » — attendu l'une de : ${[...SKILL_CATEGORIES].join(", ")}.`);
   const files = listFiles(dir).map(({ path, st }) => {
     if (!path.split("/").every((s) => SEGMENT_PATTERN.test(s))) failSkill(`nom de fichier refusé par Allkin : ${path}`);
     if (st.size > MAX_FILE_BYTES) failSkill(`${path} dépasse 20 Mo.`);
@@ -320,6 +327,7 @@ function readSkill(id) {
     ...(m.author ? { author: m.author } : {}),
     ...(m.homepage ? { homepage: m.homepage } : {}),
     ...(icon ? { icon } : {}),
+    ...(SKILL_CATEGORIES.has(m.category) ? { category: m.category } : {}),
     validation: readValidation(dir),
     ...(Object.keys(locales).length ? { locales } : {}),
     files,

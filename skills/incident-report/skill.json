@@ -1,6 +1,7 @@
 {
-  "version": "1.0.1",
+  "version": "1.0.2",
   "author": "Allkin",
+  "category": "operations",
   "locales": {
     "en": {
       "name": "Incident report",
